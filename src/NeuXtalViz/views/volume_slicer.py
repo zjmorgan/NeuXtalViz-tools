@@ -52,6 +52,7 @@ class VolumeSlicerView(NeuXtalVizWidget):
         super().__init__(parent)
 
         self.tab_widget = QTabWidget(self)
+        self.tab_widget.setToolTip("Switch between different volume slicing tools and views.")
 
         self.slicer_tab()
 
@@ -79,29 +80,34 @@ class VolumeSlicerView(NeuXtalVizWidget):
         self.vol_scale_combo.addItem("Linear")
         self.vol_scale_combo.addItem("Log")
         self.vol_scale_combo.setCurrentIndex(0)
+        self.vol_scale_combo.setToolTip("Select the scaling for the volume data (Linear or Logarithmic).")
 
         self.opacity_combo = QComboBox(self)
         self.opacity_combo.addItem("Linear")
         self.opacity_combo.addItem("Geometric")
         self.opacity_combo.addItem("Sigmoid")
         self.opacity_combo.setCurrentIndex(0)
+        self.opacity_combo.setToolTip("Choose the opacity mapping for the volume rendering.")
 
         self.range_combo = QComboBox(self)
         self.range_combo.addItem("Low->High")
         self.range_combo.addItem("High->Low")
         self.range_combo.setCurrentIndex(0)
+        self.range_combo.setToolTip("Set the direction of the opacity or color range.")
 
         self.clim_combo = QComboBox(self)
         self.clim_combo.addItem("Min/Max")
         self.clim_combo.addItem("μ±3×σ")
         self.clim_combo.addItem("Q₃/Q₁±1.5×IQR")
         self.clim_combo.setCurrentIndex(2)
+        self.clim_combo.setToolTip("Choose the method for setting color limits for the slice.")
 
         self.vlim_combo = QComboBox(self)
         self.vlim_combo.addItem("Min/Max")
         self.vlim_combo.addItem("μ±3×σ")
         self.vlim_combo.addItem("Q₃/Q₁±1.5×IQR")
         self.vlim_combo.setCurrentIndex(2)
+        self.vlim_combo.setToolTip("Choose the method for setting value limits for the cut.")
 
         self.cbar_combo = QComboBox(self)
         self.cbar_combo.addItem("Sequential")
@@ -109,8 +115,10 @@ class VolumeSlicerView(NeuXtalVizWidget):
         self.cbar_combo.addItem("Binary")
         self.cbar_combo.addItem("Diverging")
         self.cbar_combo.addItem("Modified")
+        self.cbar_combo.setToolTip("Select the colormap for the slice visualization.")
 
         self.load_NXS_button = QPushButton("Load NXS", self)
+        self.load_NXS_button.setToolTip("Load a NeXus (NXS) file for volume slicing.")
 
         draw_layout.addWidget(self.vol_scale_combo)
         draw_layout.addWidget(self.opacity_combo)
@@ -124,20 +132,24 @@ class VolumeSlicerView(NeuXtalVizWidget):
         self.slice_combo.addItem("Axis 1/3")
         self.slice_combo.addItem("Axis 2/3")
         self.slice_combo.setCurrentIndex(0)
+        self.slice_combo.setToolTip("Select the plane for slicing the volume.")
 
         self.cut_combo = QComboBox(self)
         self.cut_combo.addItem("Axis 1")
         self.cut_combo.addItem("Axis 2")
         self.cut_combo.setCurrentIndex(0)
+        self.cut_combo.setToolTip("Select the axis for cutting through the slice.")
 
         slice_label = QLabel("Slice:", self)
         cut_label = QLabel("Cut:", self)
 
         self.slice_line = QLineEdit("0.0")
         self.slice_line.setValidator(validator)
+        self.slice_line.setToolTip("Set the position of the slice along the selected plane.")
 
         self.cut_line = QLineEdit("0.0")
         self.cut_line.setValidator(validator)
+        self.cut_line.setToolTip("Set the position of the cut along the selected axis.")
 
         validator = QDoubleValidator(0.0001, 100, 5, notation=notation)
 
@@ -145,33 +157,35 @@ class VolumeSlicerView(NeuXtalVizWidget):
         cut_thickness_label = QLabel("Thickness:", self)
 
         self.slice_thickness_line = QLineEdit("0.1")
-        self.cut_thickness_line = QLineEdit("0.5")
-
         self.slice_thickness_line.setValidator(validator)
+        self.slice_thickness_line.setToolTip("Set the thickness of the slice.")
+        self.cut_thickness_line = QLineEdit("0.5")
         self.cut_thickness_line.setValidator(validator)
+        self.cut_thickness_line.setToolTip("Set the thickness of the cut.")
 
         self.slice_scale_combo = QComboBox(self)
         self.slice_scale_combo.addItem("Linear")
         self.slice_scale_combo.addItem("Log")
+        self.slice_scale_combo.setToolTip("Select the scale for the slice plot (Linear or Logarithmic).")
 
         self.cut_scale_combo = QComboBox(self)
         self.cut_scale_combo.addItem("Linear")
         self.cut_scale_combo.addItem("Log")
+        self.cut_scale_combo.setToolTip("Select the scale for the cut plot (Linear or Logarithmic).")
 
         slider_layout = QVBoxLayout()
         bar_layout = QHBoxLayout()
 
         self.min_slider = QSlider(Qt.Vertical)
         self.max_slider = QSlider(Qt.Vertical)
-
         self.min_slider.setRange(0, 100)
         self.max_slider.setRange(0, 100)
-
         self.min_slider.setValue(0)
         self.max_slider.setValue(100)
-
         self.min_slider.setTracking(False)
         self.max_slider.setTracking(False)
+        self.min_slider.setToolTip("Adjust the minimum value for the colorbar range.")
+        self.max_slider.setToolTip("Adjust the maximum value for the colorbar range.")
 
         self.vmin_line = QLineEdit("")
         self.vmax_line = QLineEdit("")
@@ -186,12 +200,18 @@ class VolumeSlicerView(NeuXtalVizWidget):
 
         self.vmin_line.setValidator(validator)
         self.vmax_line.setValidator(validator)
+        self.vmin_line.setToolTip("Set the minimum value for the colorbar.")
+        self.vmax_line.setToolTip("Set the maximum value for the colorbar.")
 
         self.xmin_line.setValidator(validator)
         self.xmax_line.setValidator(validator)
+        self.xmin_line.setToolTip("Set the minimum value for the X axis.")
+        self.xmax_line.setToolTip("Set the maximum value for the X axis.")
 
         self.ymin_line.setValidator(validator)
         self.ymax_line.setValidator(validator)
+        self.ymin_line.setToolTip("Set the minimum value for the Y axis.")
+        self.ymax_line.setToolTip("Set the maximum value for the Y axis.")
 
         xmin_label = QLabel("X Min:", self)
         xmax_label = QLabel("X Max:", self)
@@ -206,10 +226,13 @@ class VolumeSlicerView(NeuXtalVizWidget):
         bar_layout.addWidget(self.max_slider)
 
         self.save_slice_button = QPushButton("Save Slice", self)
+        self.save_slice_button.setToolTip("Save the current slice as a CSV file.")
         self.save_cut_button = QPushButton("Save Cut", self)
+        self.save_cut_button.setToolTip("Save the current cut as a CSV file.")
 
         self.toggle_line_box = QCheckBox("Show Line Cut")
         self.toggle_line_box.setChecked(False)
+        self.toggle_line_box.setToolTip("Show or hide the line cut overlay on the slice plot.")
 
         slider_layout.addLayout(bar_layout)
 

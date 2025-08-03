@@ -1,8 +1,67 @@
+"""
+VolumeSlicerModel
+----------------
+Model for handling 3D volume slicing, cutting, and histogram operations using Mantid workspaces.
+
+This class provides methods to load, process, and extract slices and cuts from multidimensional histogram workspaces.
+It supports saving slices/cuts, checking workspace states, and computing transformations for visualization.
+
+Attributes
+----------
+shape : tuple
+    Shape of the loaded volume data.
+min_lim : np.ndarray
+    Minimum bounds for each dimension.
+max_lim : np.ndarray
+    Maximum bounds for each dimension.
+labels : list
+    Axis labels for the volume.
+spacing : np.ndarray
+    Bin widths for each dimension.
+signals : list
+    Downsampled signal arrays for each axis.
+spacings : list
+    Downsampled spacings for each axis.
+
+Methods
+-------
+load_md_histo_workspace(filename)
+    Load and preprocess a Mantid MD histogram workspace.
+save_slice(filename)
+    Save the current slice to an ASCII file.
+save_cut(filename)
+    Save the current cut to an ASCII file.
+is_histo_loaded()
+    Check if a histogram workspace is loaded.
+is_sliced()
+    Check if a slice workspace exists.
+is_cut()
+    Check if a cut workspace exists.
+set_B()
+    Set the B matrix from the workspace UB.
+set_W()
+    Set the W matrix from the workspace log.
+get_histo_info(normal)
+    Get histogram info for a given normal.
+get_slice_info(normal, value, thickness)
+    Get slice info for a given normal and value.
+get_cut_info(axis, value, thickness)
+    Get cut info for a given axis and value.
+calculate_clim(trans, method)
+    Calculate color limits for visualization.
+orientation_matrix()
+    Compute the orientation matrix.
+get_transform(reciprocal)
+    Get the transformation matrix.
+get_transforms()
+    Get projection, transform, and scale matrices.
+get_normal_plane(ind)
+    Get the normal vector for a plane.
+"""
+
 from mantid.simpleapi import (
     LoadMD,
-    CloneMDWorkspace,
     IntegrateMDHistoWorkspace,
-    DivideMD,
     CompactMD,
     mtd,
 )
@@ -18,9 +77,20 @@ from NeuXtalViz.models.utilities import SaveMDToAscii
 
 class VolumeSlicerModel(NeuXtalVizModel):
     def __init__(self):
+        """
+        Initialize the VolumeSlicerModel.
+        """
         super(VolumeSlicerModel, self).__init__()
 
     def load_md_histo_workspace(self, filename):
+        """
+        Load and preprocess a Mantid MD histogram workspace from a file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the Mantid MD histogram file to load.
+        """
         LoadMD(Filename=filename, OutputWorkspace="histo")
 
         signal = mtd["histo"].getSignalArray().copy()
@@ -76,21 +146,64 @@ class VolumeSlicerModel(NeuXtalVizModel):
         self.set_W()
 
     def save_slice(self, filename):
+        """
+        Save the current slice workspace to an ASCII file.
+
+        Parameters
+        ----------
+        filename : str
+            Output filename for the slice.
+        """
         SaveMDToAscii("slice", filename)
 
     def save_cut(self, filename):
+        """
+        Save the current cut workspace to an ASCII file.
+
+        Parameters
+        ----------
+        filename : str
+            Output filename for the cut.
+        """
         SaveMDToAscii("cut", filename)
 
     def is_histo_loaded(self):
+        """
+        Check if a histogram workspace is loaded in Mantid.
+
+        Returns
+        -------
+        bool
+            True if 'histo' workspace exists, False otherwise.
+        """
         return mtd.doesExist("histo")
 
     def is_sliced(self):
+        """
+        Check if a slice workspace exists in Mantid.
+
+        Returns
+        -------
+        bool
+            True if 'slice' workspace exists, False otherwise.
+        """
         return mtd.doesExist("slice")
 
     def is_cut(self):
+        """
+        Check if a cut workspace exists in Mantid.
+
+        Returns
+        -------
+        bool
+            True if 'cut' workspace exists, False otherwise.
+        """
         return mtd.doesExist("cut")
 
     def set_B(self):
+        """
+        Set the B matrix from the UB of the loaded histogram workspace.
+        """
         if self.has_UB("histo"):
             ei = mtd["histo"].getExperimentInfo(0)
 
@@ -99,6 +212,9 @@ class VolumeSlicerModel(NeuXtalVizModel):
             self.set_UB(B)
 
     def set_W(self):
+        """
+        Set the W matrix from the workspace log if available, otherwise identity.
+        """
         ei = mtd["histo"].getExperimentInfo(0)
 
         self.W = np.eye(3)
@@ -107,6 +223,19 @@ class VolumeSlicerModel(NeuXtalVizModel):
             self.W = ei.run().getLogData("W_MATRIX").value.reshape(3, 3)
 
     def get_histo_info(self, normal):
+        """
+        Get histogram information for a given normal direction.
+
+        Parameters
+        ----------
+        normal : array-like
+            Normal vector for the slicing direction.
+
+        Returns
+        -------
+        dict
+            Dictionary containing signal, limits, spacing, labels, and transforms.
+        """
         ind = np.abs(normal).tolist().index(1)
 
         histo_dict = {}
@@ -127,6 +256,23 @@ class VolumeSlicerModel(NeuXtalVizModel):
         return histo_dict
 
     def get_slice_info(self, normal, value, thickness=0.01):
+        """
+        Get slice information for a given normal and value.
+
+        Parameters
+        ----------
+        normal : array-like
+            Normal vector for the slicing direction.
+        value : float
+            Position along the normal to slice.
+        thickness : float, optional
+            Thickness of the slice (default 0.01).
+
+        Returns
+        -------
+        dict
+            Dictionary containing x, y, labels, signal, transform, aspect, value, and title.
+        """
         self.normal = normal
 
         slice_dict = {}
@@ -199,6 +345,23 @@ class VolumeSlicerModel(NeuXtalVizModel):
         return slice_dict
 
     def get_cut_info(self, axis, value, thickness=0.01):
+        """
+        Get cut information for a given axis and value.
+
+        Parameters
+        ----------
+        axis : array-like
+            Axis along which to cut (e.g., [1,0,0]).
+        value : float
+            Position along the axis to cut.
+        thickness : float, optional
+            Thickness of the cut (default 0.01).
+
+        Returns
+        -------
+        dict
+            Dictionary containing x, y, e, label, value, and title.
+        """
         cut_dict = {}
 
         integrate = [value - thickness, value + thickness]
@@ -242,6 +405,21 @@ class VolumeSlicerModel(NeuXtalVizModel):
         return cut_dict
 
     def calculate_clim(self, trans, method="normal"):
+        """
+        Calculate color limits for visualization based on a method.
+
+        Parameters
+        ----------
+        trans : np.ndarray
+            Array of values to calculate limits for.
+        method : str, optional
+            Method for calculation: 'normal', 'boxplot', or 'minmax'.
+
+        Returns
+        -------
+        np.ndarray
+            Array with values clipped to the calculated color limits.
+        """
         trans[~np.isfinite(trans)] = np.nan
 
         vmin, vmax = np.nanmin(trans), np.nanmax(trans)
@@ -278,6 +456,14 @@ class VolumeSlicerModel(NeuXtalVizModel):
         return trans
 
     def orientation_matrix(self):
+        """
+        Compute the orientation matrix for the current UB and W matrices.
+
+        Returns
+        -------
+        np.ndarray
+            Orientation matrix.
+        """
         Bp = np.dot(self.UB, self.W)
 
         Q, R = scipy.linalg.qr(Bp)
@@ -289,6 +475,19 @@ class VolumeSlicerModel(NeuXtalVizModel):
         return np.dot(Q.T, self.UB)
 
     def get_transform(self, reciprocal=True):
+        """
+        Get the transformation matrix for the current UB and W matrices.
+
+        Parameters
+        ----------
+        reciprocal : bool, optional
+            If True, return reciprocal transformation; else real space.
+
+        Returns
+        -------
+        np.ndarray
+            Transformation matrix.
+        """
         if self.UB is not None:
             b = self.UB / np.linalg.norm(self.UB, axis=0)
 
@@ -314,6 +513,14 @@ class VolumeSlicerModel(NeuXtalVizModel):
             return T
 
     def get_transforms(self):
+        """
+        Get projection, transform, and scale matrices for the current UB and W.
+
+        Returns
+        -------
+        tuple
+            (projection, transform, scale) matrices.
+        """
         Bp = np.dot(self.UB, self.W)
 
         Q, R = scipy.linalg.qr(Bp)
@@ -329,6 +536,19 @@ class VolumeSlicerModel(NeuXtalVizModel):
         return p, t, s
 
     def get_normal_plane(self, ind):
+        """
+        Get the normal vector for a plane given an index vector.
+
+        Parameters
+        ----------
+        ind : array-like
+            Index vector for the plane.
+
+        Returns
+        -------
+        np.ndarray
+            Normal vector for the plane.
+        """
         if self.UB is not None:
             Bp = np.dot(self.UB, self.W)
 

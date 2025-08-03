@@ -1,12 +1,47 @@
+"""
+NeuXtalVizModel
+--------------
+Base model for crystallographic and reciprocal lattice operations using Mantid workspaces.
+
+This class provides methods for handling UB matrices, checking oriented lattices, and computing
+various crystallographic and reciprocal axes and transformations for visualization and analysis.
+
+Attributes
+----------
+UB : np.ndarray or None
+    The 3x3 UB matrix for the current workspace, or None if not set.
+
+Methods
+-------
+has_UB(ws)
+    Check if the oriented lattice exists on a workspace.
+set_UB(UB)
+    Update the UB-matrix.
+get_oriented_lattice_parameters()
+    Obtain the oriented lattice parameters (a, b, c, alpha, beta, gamma, u, v).
+orientation_matrix()
+    Return the current UB matrix (orientation matrix).
+get_transform(reciprocal)
+    Transformation matrix describing the reciprocal or crystal axes.
+ab_star_axes(), bc_star_axes(), ca_star_axes()
+    Cartesian camera/upward view vectors for various axes.
+ab_axes(), bc_axes(), ca_axes()
+    Cartesian camera/upward view vectors for reciprocal axes.
+get_vector(axes_type, ind)
+    Vector corresponding to a particular crystallographic direction.
+"""
+
 from mantid.simpleapi import HasUB
-
 from mantid.geometry import OrientedLattice
-
 import numpy as np
 
 
 class NeuXtalVizModel:
     def __init__(self):
+        """
+        Initialize the NeuXtalVizModel with no UB matrix.
+        """
+
         self.UB = None
 
     def has_UB(self, ws):
@@ -21,7 +56,7 @@ class NeuXtalVizModel:
         Returns
         -------
         ol : bool
-            Oriented lattice exists or not.
+            True if oriented lattice exists, False otherwise.
 
         """
 
@@ -36,7 +71,7 @@ class NeuXtalVizModel:
         Parameters
         ----------
         UB : 3x3 element 2d array
-            UB-matrix.
+            UB-matrix to set for the model.
 
         """
 
@@ -44,7 +79,7 @@ class NeuXtalVizModel:
 
     def get_oriented_lattice_parameters(self):
         """
-        Obtain the oriented lattice paramters.
+        Obtain the oriented lattice parameters.
 
         Returns
         -------
@@ -52,6 +87,8 @@ class NeuXtalVizModel:
             Lattice constants.
         alpha, beta, gamma : float
             Lattice angles.
+        u, v : np.ndarray
+            Normalized u and v vectors.
 
         """
 
@@ -69,6 +106,16 @@ class NeuXtalVizModel:
             return *params, u, v
 
     def orientation_matrix(self):
+        """
+        Return the current UB matrix (orientation matrix).
+
+        Returns
+        -------
+        np.ndarray
+            The UB matrix.
+
+        """
+
         return self.UB.copy()
 
     def get_transform(self, reciprocal=True):
@@ -77,9 +124,9 @@ class NeuXtalVizModel:
 
         Parameters
         ----------
-        reciprocal : bool
-            Option for the reciprocal or crystal lattice axes.
-            Default is ``True``.
+        reciprocal : bool, optional
+            Option for the reciprocal (True) or crystal lattice axes (False).
+            Default is True.
 
         Returns
         -------
@@ -110,7 +157,7 @@ class NeuXtalVizModel:
         -------
         camera : 3 element 1d array
             Cartesian camera view vector.
-        updward : 3 element 1d array
+        upward : 3 element 1d array
             Cartesian upward view vector.
 
         """
@@ -122,13 +169,13 @@ class NeuXtalVizModel:
 
     def bc_star_axes(self):
         """
-        :math:`a`-direction in cartesian coordinates
+        :math:`a`-direction in cartesian coordinates.
 
         Returns
         -------
         camera : 3 element 1d array
             Cartesian camera view vector.
-        updward : 3 element 1d array
+        upward : 3 element 1d array
             Cartesian upward view vector.
 
         """
@@ -140,13 +187,13 @@ class NeuXtalVizModel:
 
     def ca_star_axes(self):
         """
-        :math:`b`-direction in cartesian coordinates
+        :math:`b`-direction in cartesian coordinates.
 
         Returns
         -------
         camera : 3 element 1d array
             Cartesian camera view vector.
-        updward : 3 element 1d array
+        upward : 3 element 1d array
             Cartesian upward view vector.
 
         """
@@ -158,13 +205,13 @@ class NeuXtalVizModel:
 
     def ab_axes(self):
         """
-        :math:`c^\ast`-direction in cartesian coordinates.
+        :math:`c^*`-direction in cartesian coordinates.
 
         Returns
         -------
         camera : 3 element 1d array
             Cartesian camera view vector.
-        updward : 3 element 1d array
+        upward : 3 element 1d array
             Cartesian upward view vector.
 
         """
@@ -176,13 +223,13 @@ class NeuXtalVizModel:
 
     def bc_axes(self):
         """
-        :math:`a^\ast`-direction in cartesian coordinates.
+        :math:`a^*`-direction in cartesian coordinates.
 
         Returns
         -------
         camera : 3 element 1d array
             Cartesian camera view vector.
-        updward : 3 element 1d array
+        upward : 3 element 1d array
             Cartesian upward view vector.
 
         """
@@ -194,13 +241,13 @@ class NeuXtalVizModel:
 
     def ca_axes(self):
         """
-        :math:`b^\ast`-direction in cartesian coordinates.
+        :math:`b^*`-direction in cartesian coordinates.
 
         Returns
         -------
         camera : 3 element 1d array
             Cartesian camera view vector.
-        updward : 3 element 1d array
+        upward : 3 element 1d array
             Cartesian upward view vector.
 
         """
