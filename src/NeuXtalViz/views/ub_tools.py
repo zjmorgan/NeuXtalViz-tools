@@ -78,13 +78,19 @@ class UBView(NeuXtalVizWidget):
         ub_layout = QVBoxLayout()
 
         self.save_q_button = QPushButton("Save Q", self)
+        self.save_q_button.setToolTip("Save the Q workspace to a file.")
         self.load_q_button = QPushButton("Load Q", self)
+        self.load_q_button.setToolTip("Load a Q workspace from a file.")
 
         self.save_peaks_button = QPushButton("Save Peaks", self)
+        self.save_peaks_button.setToolTip("Save the peaks table to a file.")
         self.load_peaks_button = QPushButton("Load Peaks", self)
+        self.load_peaks_button.setToolTip("Load a peaks table from a file.")
 
         self.save_ub_button = QPushButton("Save UB", self)
+        self.save_ub_button.setToolTip("Save the UB matrix to a file.")
         self.load_ub_button = QPushButton("Load UB", self)
+        self.load_ub_button.setToolTip("Load a UB matrix from a file.")
 
         convert_io_layout = QHBoxLayout()
 
@@ -324,6 +330,7 @@ class UBView(NeuXtalVizWidget):
         self.instrument_combo.addItem("SNAP")
         self.instrument_combo.addItem("WAND²")
         self.instrument_combo.addItem("DEMAND")
+        self.instrument_combo.setToolTip("Select the instrument for data conversion.")
 
         ipts_label = QLabel("IPTS:")
         exp_label = QLabel("Experiment:")
@@ -337,15 +344,19 @@ class UBView(NeuXtalVizWidget):
 
         self.ipts_line = QLineEdit("")
         self.ipts_line.setValidator(validator)
+        self.ipts_line.setToolTip("Enter the IPTS number for the experiment.")
 
         self.exp_line = QLineEdit("")
         self.exp_line.setValidator(validator)
+        self.exp_line.setToolTip("Enter the experiment number.")
 
         self.cal_line = QLineEdit("")
         self.tube_line = QLineEdit("")
 
         self.wl_min_line = QLineEdit("0.3")
+        self.wl_min_line.setToolTip("Minimum wavelength for conversion.")
         self.wl_max_line = QLineEdit("3.5")
+        self.wl_max_line.setToolTip("Maximum wavelength for conversion.")
 
         wl_label = QLabel("λ:")
 
@@ -360,11 +371,13 @@ class UBView(NeuXtalVizWidget):
 
         self.convert_min_d_line = QLineEdit("0.7")
         self.convert_min_d_line.setValidator(validator)
+        self.convert_min_d_line.setToolTip("Minimum d-spacing for conversion.")
 
         validator = QIntValidator(1, 1000, self)
 
         self.filter_time_line = QLineEdit("")
         self.filter_time_line.setValidator(validator)
+        self.filter_time_line.setToolTip("Maximum time (s) for filtering events.")
 
         self.cal_browse_button = QPushButton("Detector", self)
         self.tube_browse_button = QPushButton("Tube", self)
@@ -389,9 +402,11 @@ class UBView(NeuXtalVizWidget):
         instrument_params_layout.addWidget(self.tube_browse_button, 2, 1)
 
         self.convert_to_q_button = QPushButton("Convert", self)
+        self.convert_to_q_button.setToolTip("Convert raw data to Q workspace.")
 
         self.lorentz_box = QCheckBox("Lorentz Correction", self)
         self.lorentz_box.setChecked(True)
+        self.lorentz_box.setToolTip("Apply Lorentz correction during conversion.")
 
         convert_to_q_action_layout = QHBoxLayout()
         convert_to_q_action_layout.addWidget(self.convert_to_q_button)
@@ -436,11 +451,13 @@ class UBView(NeuXtalVizWidget):
 
         self.max_peaks_line = QLineEdit("100")
         self.max_peaks_line.setValidator(validator)
+        self.max_peaks_line.setToolTip("Maximum number of peaks to find.")
 
         validator = QIntValidator(1, 100000, self)
 
         self.density_threshold_line = QLineEdit("100")
         self.density_threshold_line.setValidator(validator)
+        self.density_threshold_line.setToolTip("Minimum density threshold for peak finding.")
 
         notation = QDoubleValidator.StandardNotation
 
@@ -448,16 +465,19 @@ class UBView(NeuXtalVizWidget):
 
         self.min_distance_line = QLineEdit("0.20")
         self.min_distance_line.setValidator(validator)
+        self.min_distance_line.setToolTip("Minimum distance between peaks (Å⁻¹).")
 
         validator = QDoubleValidator(0.1, 100, 4, notation=notation)
 
         self.max_spacing_line = QLineEdit("31.46")
         self.max_spacing_line.setValidator(validator)
+        self.max_spacing_line.setToolTip("Maximum d-spacing for peaks (Å).")
 
         validator = QIntValidator(0, 64, self)
 
         self.find_edge_line = QLineEdit("0")
         self.find_edge_line.setValidator(validator)
+        self.find_edge_line.setToolTip("Number of edge pixels to exclude from peak finding.")
 
         find_params_layout = QGridLayout()
 
@@ -477,6 +497,7 @@ class UBView(NeuXtalVizWidget):
         find_params_layout.addWidget(self.find_edge_line, 2, 1)
 
         self.find_button = QPushButton("Find", self)
+        self.find_button.setToolTip("Find peaks in the Q workspace.")
 
         find_action_layout = QHBoxLayout()
         find_action_layout.addWidget(self.find_button)
@@ -503,9 +524,11 @@ class UBView(NeuXtalVizWidget):
 
         self.index_tolerance_line = QLineEdit("0.1")
         self.index_tolerance_line.setValidator(validator)
+        self.index_tolerance_line.setToolTip("Tolerance for indexing peaks.")
 
         self.index_sat_tolerance_line = QLineEdit("0.1")
         self.index_sat_tolerance_line.setValidator(validator)
+        self.index_sat_tolerance_line.setToolTip("Tolerance for satellite peak indexing.")
 
         index_params_layout = QGridLayout()
 
@@ -516,8 +539,10 @@ class UBView(NeuXtalVizWidget):
 
         self.round_box = QCheckBox("Round hkl", self)
         self.round_box.setChecked(True)
+        self.round_box.setToolTip("Round hkl values to nearest integer.")
 
         self.index_button = QPushButton("Index", self)
+        self.index_button.setToolTip("Index the peaks using the current UB.")
 
         index_action_layout = QHBoxLayout()
         index_action_layout.addWidget(self.index_button)
@@ -542,6 +567,7 @@ class UBView(NeuXtalVizWidget):
         self.centering_combo.addItem("B")
         self.centering_combo.addItem("C")
         self.centering_combo.addItem("H")
+        self.centering_combo.setToolTip("Select lattice centering for peak prediction.")
 
         min_d_unit_label = QLabel("Å")
 
@@ -550,6 +576,7 @@ class UBView(NeuXtalVizWidget):
 
         self.predict_sat_box = QCheckBox("Satellite", self)
         self.predict_sat_box.setChecked(False)
+        self.predict_sat_box.setToolTip("Enable satellite peak prediction.")
 
         notation = QDoubleValidator.StandardNotation
 
@@ -557,14 +584,17 @@ class UBView(NeuXtalVizWidget):
 
         self.min_d_line = QLineEdit("0.7")
         self.min_d_line.setValidator(validator)
+        self.min_d_line.setToolTip("Minimum d-spacing for peak prediction.")
 
         self.min_sat_d_line = QLineEdit("1.0")
         self.min_sat_d_line.setValidator(validator)
+        self.min_sat_d_line.setToolTip("Minimum d-spacing for satellite peaks.")
 
         validator = QIntValidator(0, 64, self)
 
         self.predict_edge_line = QLineEdit("0")
         self.predict_edge_line.setValidator(validator)
+        self.predict_edge_line.setToolTip("Number of edge pixels to exclude from prediction.")
 
         predict_tab = QWidget()
         predict_tab_layout = QVBoxLayout()
@@ -582,6 +612,7 @@ class UBView(NeuXtalVizWidget):
         predict_params_layout.addWidget(self.predict_sat_box, 2, 2)
 
         self.predict_button = QPushButton("Predict", self)
+        self.predict_button.setToolTip("Predict peak positions based on UB and centering.")
 
         predict_action_layout = QHBoxLayout()
         predict_action_layout.addWidget(self.predict_button)
@@ -595,9 +626,11 @@ class UBView(NeuXtalVizWidget):
 
         self.centroid_box = QCheckBox("Centroid", self)
         self.centroid_box.setChecked(True)
+        self.centroid_box.setToolTip("Use centroid for peak integration.")
 
         self.adaptive_box = QCheckBox("Adaptive Envelope", self)
         self.adaptive_box.setChecked(True)
+        self.adaptive_box.setToolTip("Enable adaptive envelope for integration.")
 
         radius_label = QLabel("Radius:")
         inner_label = QLabel("Inner Factor:")
@@ -610,6 +643,7 @@ class UBView(NeuXtalVizWidget):
 
         self.radius_line = QLineEdit("0.25")
         self.radius_line.setValidator(validator)
+        self.radius_line.setToolTip("Peak integration radius (Å⁻¹).")
 
         notation = QDoubleValidator.StandardNotation
 
@@ -617,9 +651,11 @@ class UBView(NeuXtalVizWidget):
 
         self.inner_line = QLineEdit("1.5")
         self.inner_line.setValidator(validator)
+        self.inner_line.setToolTip("Inner factor for background shell.")
 
         self.outer_line = QLineEdit("2")
         self.outer_line.setValidator(validator)
+        self.outer_line.setToolTip("Outer factor for background shell.")
 
         integrate_tab = QWidget()
         integrate_tab_layout = QVBoxLayout()
@@ -635,6 +671,7 @@ class UBView(NeuXtalVizWidget):
         integrate_params_layout.addWidget(self.outer_line, 2, 3)
 
         self.integrate_button = QPushButton("Integrate", self)
+        self.integrate_button.setToolTip("Integrate peak intensities.")
 
         integrate_action_layout = QHBoxLayout()
         integrate_action_layout.addWidget(self.integrate_button)
@@ -671,6 +708,7 @@ class UBView(NeuXtalVizWidget):
 
         self.filter_line = QLineEdit("0")
         self.filter_line.setValidator(validator)
+        self.filter_line.setToolTip("Value for filtering peaks.")
 
         filter_tab = QWidget()
         filter_tab_layout = QVBoxLayout()
@@ -682,6 +720,7 @@ class UBView(NeuXtalVizWidget):
         filter_params_layout.addWidget(self.filter_line)
 
         self.filter_button = QPushButton("Filter", self)
+        self.filter_button.setToolTip("Apply filter to peaks table.")
 
         filter_action_layout = QHBoxLayout()
         filter_action_layout.addWidget(self.filter_button)
@@ -712,11 +751,13 @@ class UBView(NeuXtalVizWidget):
 
         self.calculate_tolerance_line = QLineEdit("0.1")
         self.calculate_tolerance_line.setValidator(validator)
+        self.calculate_tolerance_line.setToolTip("Tolerance for UB calculation.")
 
         max_scalar_error_label = QLabel("Max Scalar Error:")
 
         self.max_scalar_error_line = QLineEdit("0.2")
         self.max_scalar_error_line.setValidator(validator)
+        self.max_scalar_error_line.setToolTip("Maximum scalar error for cell search.")
 
         calculate_tab = QWidget()
         calculate_tab_layout = QVBoxLayout()
@@ -729,13 +770,15 @@ class UBView(NeuXtalVizWidget):
         calculate_params_layout.addWidget(self.max_scalar_error_line, 0, 3)
 
         self.conventional_button = QPushButton("Conventional", self)
+        self.conventional_button.setToolTip("Transform to conventional cell.")
         self.niggli_button = QPushButton("Primitive", self)
+        self.niggli_button.setToolTip("Transform to primitive (Niggli) cell.")
         self.select_button = QPushButton("Select", self)
+        self.select_button.setToolTip("Select the highlighted cell.")
 
         self.form_line = QLineEdit("")
         self.form_line.setReadOnly(True)
-
-        form_label = QLabel("Form:")
+        self.form_line.setToolTip("Form number of the selected cell.")
 
         min_const_label = QLabel("Min(a,b,c) [Å]:")
         max_const_label = QLabel("Max(a,b,c) [Å]:")
@@ -749,6 +792,8 @@ class UBView(NeuXtalVizWidget):
 
         self.min_const_line.setValidator(validator)
         self.max_const_line.setValidator(validator)
+        self.min_const_line.setToolTip("Minimum lattice constant for cell search.")
+        self.max_const_line.setToolTip("Maximum lattice constant for cell search.")
 
         const_layout = QHBoxLayout()
         const_layout.addWidget(min_const_label)
@@ -789,6 +834,7 @@ class UBView(NeuXtalVizWidget):
 
         self.transform_tolerance_line = QLineEdit("0.1")
         self.transform_tolerance_line.setValidator(validator)
+        self.transform_tolerance_line.setToolTip("Tolerance for lattice transformation.")
 
         self.lattice_combo = QComboBox(self)
         self.lattice_combo.addItem("Triclinic")
@@ -798,10 +844,12 @@ class UBView(NeuXtalVizWidget):
         self.lattice_combo.addItem("Rhombohedral")
         self.lattice_combo.addItem("Hexagonal")
         self.lattice_combo.addItem("Cubic")
+        self.lattice_combo.setToolTip("Select lattice system for transformation.")
 
         self.symmetry_combo = QComboBox(self)
         self.symmetry_combo.addItem("x,y,z")
         self.symmetry_combo.addItem("-x,-y,-z")
+        self.symmetry_combo.setToolTip("Select symmetry operation for transformation.")
 
         notation = QDoubleValidator.StandardNotation
 
@@ -868,6 +916,7 @@ class UBView(NeuXtalVizWidget):
         transform_matrix_layout.addWidget(self.T33_line, 3, 3)
 
         self.transform_button = QPushButton("Transform", self)
+        self.transform_button.setToolTip("Apply the lattice transformation.")
 
         transform_action_layout = QHBoxLayout()
         transform_action_layout.addWidget(self.transform_button)
@@ -888,6 +937,7 @@ class UBView(NeuXtalVizWidget):
 
         self.refine_tolerance_line = QLineEdit("0.1")
         self.refine_tolerance_line.setValidator(validator)
+        self.refine_tolerance_line.setToolTip("Tolerance for UB refinement.")
 
         self.optimize_combo = QComboBox(self)
         self.optimize_combo.addItem("Unconstrained")
@@ -899,6 +949,7 @@ class UBView(NeuXtalVizWidget):
         self.optimize_combo.addItem("Rhombohedral")
         self.optimize_combo.addItem("Hexagonal")
         self.optimize_combo.addItem("Cubic")
+        self.optimize_combo.setToolTip("Select refinement constraints or lattice system.")
 
         refine_tab = QWidget()
         refine_tab_layout = QVBoxLayout()
@@ -909,6 +960,7 @@ class UBView(NeuXtalVizWidget):
         refine_params_layout.addWidget(self.optimize_combo)
 
         self.refine_button = QPushButton("Refine", self)
+        self.refine_button.setToolTip("Refine the UB matrix.")
 
         refine_action_layout = QHBoxLayout()
         refine_action_layout.addWidget(self.refine_button)
@@ -974,6 +1026,7 @@ class UBView(NeuXtalVizWidget):
         self.phi_line.setEnabled(False)
 
         self.calculate = QPushButton("Calculate", self)
+        self.calculate.setToolTip("Calculate d-spacings and angle between peaks.")
 
         calculator_layout.addWidget(h_label, 0, 1, Qt.AlignCenter)
         calculator_layout.addWidget(k_label, 0, 2, Qt.AlignCenter)
@@ -1008,6 +1061,7 @@ class UBView(NeuXtalVizWidget):
         self.peaks_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.peaks_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.peaks_table.setSortingEnabled(True)
+        self.peaks_table.setToolTip("Table of indexed peaks and their properties.")
 
         extended_info = QGridLayout()
 
@@ -1223,12 +1277,14 @@ class UBView(NeuXtalVizWidget):
         convert_to_hkl_params_layout.addWidget(self.W3_line, 3, 3)
 
         self.convert_to_hkl_button = QPushButton("Convert", self)
+        self.convert_to_hkl_button.setToolTip("Convert HKL to Q space.")
 
         self.clim_combo = QComboBox(self)
         self.clim_combo.addItem("Min/Max")
         self.clim_combo.addItem("μ±3×σ")
         self.clim_combo.addItem("Q₃/Q₁±1.5×IQR")
         self.clim_combo.setCurrentIndex(1)
+        self.clim_combo.setToolTip("Select color limit adjustment method.")
 
         self.cbar_combo = QComboBox(self)
         self.cbar_combo.addItem("Sequential")
@@ -1237,12 +1293,14 @@ class UBView(NeuXtalVizWidget):
         self.cbar_combo.addItem("Diverging")
         self.cbar_combo.addItem("Modified")
         self.cbar_combo.setCurrentIndex(2)
+        self.cbar_combo.setToolTip("Select color map for the slice view.")
 
         self.slice_combo = QComboBox(self)
         self.slice_combo.addItem("Axis 1/2")
         self.slice_combo.addItem("Axis 1/3")
         self.slice_combo.addItem("Axis 2/3")
         self.slice_combo.setCurrentIndex(0)
+        self.slice_combo.setToolTip("Select the axes for the slice view.")
 
         bar_layout = QHBoxLayout()
 
@@ -1265,6 +1323,7 @@ class UBView(NeuXtalVizWidget):
 
         self.slice_line = QLineEdit("0.0")
         self.slice_line.setValidator(validator)
+        self.slice_line.setToolTip("Enter the slice position value.")
 
         validator = QDoubleValidator(0.0001, 100, 5, notation=notation)
 
@@ -1272,6 +1331,7 @@ class UBView(NeuXtalVizWidget):
 
         self.slice_thickness_line = QLineEdit("0.1")
         self.slice_thickness_line.setValidator(validator)
+        self.slice_thickness_line.setToolTip("Enter the slice thickness value.")
 
         validator = QDoubleValidator(0.005, 0.5, 5, notation=notation)
 
@@ -1279,10 +1339,12 @@ class UBView(NeuXtalVizWidget):
 
         self.slice_width_line = QLineEdit("0.05")
         self.slice_width_line.setValidator(validator)
+        self.slice_width_line.setToolTip("Enter the slice width value.")
 
         self.slice_scale_combo = QComboBox(self)
         self.slice_scale_combo.addItem("Linear")
         self.slice_scale_combo.addItem("Log")
+        self.slice_scale_combo.setToolTip("Select the scale for the slice view.")
 
         convert_to_hkl_action_layout = QHBoxLayout()
         convert_to_hkl_action_layout.addWidget(self.convert_to_hkl_button)
@@ -1345,15 +1407,18 @@ class UBView(NeuXtalVizWidget):
 
         self.d_min_line = QLineEdit("0")
         self.d_min_line.setValidator(validator)
+        self.d_min_line.setToolTip("Minimum d-spacing for verification.")
 
         self.d_max_line = QLineEdit("inf")
         self.d_max_line.setValidator(validator)
+        self.d_max_line.setToolTip("Maximum d-spacing for verification.")
 
         self.check_h_line = QLineEdit()
         self.check_k_line = QLineEdit()
         self.check_l_line = QLineEdit()
 
         self.check_hkl_button = QPushButton("Check hkl", self)
+        self.check_hkl_button.setToolTip("Check the validity of the hkl indices.")
 
         notation = QDoubleValidator.StandardNotation
 
@@ -1385,17 +1450,21 @@ class UBView(NeuXtalVizWidget):
 
         self.vertical_line = QLineEdit("0")
         self.vertical_line.setValidator(validator)
+        self.vertical_line.setToolTip("Vertical angle for the detector view.")
 
         self.horizontal_line = QLineEdit("0")
         self.horizontal_line.setValidator(validator)
+        self.horizontal_line.setToolTip("Horizontal angle for the detector view.")
 
         validator = QDoubleValidator(0, 180, 5, notation=notation)
 
         self.vertical_roi_line = QLineEdit("2")
         self.vertical_roi_line.setValidator(validator)
+        self.vertical_roi_line.setToolTip("Vertical ROI size for the detector view.")
 
         self.horizontal_roi_line = QLineEdit("2")
         self.horizontal_roi_line.setValidator(validator)
+        self.horizontal_roi_line.setToolTip("Horizontal ROI size for the detector view.")
 
         angle_layout = QHBoxLayout()
         angle_layout.addWidget(horizontal_label)
@@ -1408,6 +1477,7 @@ class UBView(NeuXtalVizWidget):
         angle_layout.addWidget(self.vertical_roi_line)
 
         self.add_peak_button = QPushButton("Add Peak", self)
+        self.add_peak_button.setToolTip("Add a peak to the list.")
 
         self.diffraction_label = QLabel("Axis:", self)
 
@@ -1417,6 +1487,7 @@ class UBView(NeuXtalVizWidget):
 
         self.diffraction_line = QLineEdit("0")
         self.diffraction_line.setValidator(validator)
+        self.diffraction_line.setToolTip("Diffraction angle or wavelength.")
 
         peak_layout = QHBoxLayout()
         peak_layout.addWidget(self.diffraction_label)
@@ -1458,6 +1529,7 @@ class UBView(NeuXtalVizWidget):
         modulation_layout = QVBoxLayout()
 
         self.cluster_button = QPushButton("Cluster", self)
+        self.cluster_button.setToolTip("Cluster the selected peaks.")
 
         self.param_eps_line = QLineEdit("0.025")
         self.param_min_line = QLineEdit("15")
@@ -1863,6 +1935,8 @@ class UBView(NeuXtalVizWidget):
     def load_UB_file_dialog(self, path=""):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
+
+       
 
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.AnyFile)

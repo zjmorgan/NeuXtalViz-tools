@@ -1,3 +1,15 @@
+"""
+UBModel and related utilities for crystallographic analysis in NeuXtalViz.
+
+This module provides the UBModel class, which encapsulates methods for loading, manipulating, and analyzing crystallographic data, including peak finding, UB matrix determination, lattice refinement, and peak clustering. It interfaces with Mantid algorithms for data processing and supports both conventional and modulated structures.
+
+Classes
+-------
+UBModel
+    Main model for UB matrix and peak table operations, including loading/saving, indexing, integration, and clustering.
+
+"""
+
 import os
 from collections import defaultdict
 
@@ -23,6 +35,7 @@ from mantid.simpleapi import (
     IntegratePeaksMD,
     FilterPeaks,
     SortPeaksWorkspace,
+    LoadIsawPeaks,
     DeleteWorkspace,
     DeleteTableRows,
     CombinePeaksWorkspaces,
@@ -67,9 +80,6 @@ config["Q.convention"] = "Crystallography"
 from mantid.geometry import (
     PointGroupFactory,
     UnitCell,
-    CrystalStructure,
-    ReflectionGenerator,
-    ReflectionConditionFilter,
 )
 
 from mantid.kernel import V3D
@@ -118,7 +128,17 @@ variable = {
 
 
 class UBModel(NeuXtalVizModel):
+    """
+    Model for UB matrix and peak table operations in NeuXtalViz.
+
+    Provides methods for loading, saving, and manipulating crystallographic data, including peak finding, UB matrix determination, lattice refinement, and clustering. Integrates with Mantid algorithms for data processing and supports both conventional and modulated structures.
+    """
+
     def __init__(self):
+        """
+        Initialize the UBModel instance and set up internal state.
+        """
+
         super(UBModel, self).__init__()
 
         self.Q = None
@@ -131,6 +151,15 @@ class UBModel(NeuXtalVizModel):
         CreateSampleWorkspace(OutputWorkspace="ub_lattice")
 
     def has_Q(self):
+        """
+        Check if the Q workspace exists in Mantid.
+
+        Returns
+        -------
+        bool
+            True if Q workspace exists, False otherwise.
+        """
+
         if self.Q is None:
             return False
         elif mtd.doesExist(self.Q):
@@ -139,34 +168,121 @@ class UBModel(NeuXtalVizModel):
             return False
 
     def has_peaks(self):
+        """
+        Check if the peaks table exists in Mantid.
+
+        Returns
+        -------
+        bool
+            True if peaks table exists, False otherwise.
+        """
+
         if mtd.doesExist(self.table):
             return True
         else:
             return False
 
     def has_UB(self):
+        """
+        Check if the UB matrix is defined on the sample.
+
+        Returns
+        -------
+        bool
+            True if UB matrix is present, False otherwise.
+        """
+
         return HasUB(Workspace=self.cell)
 
     def get_UB(self):
+        """
+        Retrieve the UB matrix from the oriented lattice.
+
+        Returns
+        -------
+        np.ndarray
+            3x3 UB matrix if present, else None.
+        """
+
         if self.has_UB():
             return mtd[self.cell].sample().getOrientedLattice().getUB().copy()
 
     def update_UB(self):
+        """
+        Update the UB matrix on the sample and synchronize with Mantid workspaces.
+        """
+
         UB = self.get_UB()
 
         if UB is not None:
             self.set_UB(UB)
 
     def get_instrument_name(self, instrument):
+        """
+        Get the instrument name string for a given instrument identifier.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+
+        Returns
+        -------
+        str
+            Instrument name.
+        """
+
         return beamlines[instrument]["Name"]
 
     def get_goniometers(self, instrument):
+        """
+        Get goniometer settings for a given instrument.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+
+        Returns
+        -------
+        list
+            List of goniometer settings.
+        """
+
         return beamlines[instrument]["Goniometers"]
 
     def get_wavelength(self, instrument):
+        """
+        Get the wavelength for a given instrument.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+
+        Returns
+        -------
+        float
+            Wavelength in angstroms.
+        """
+
         return beamlines[instrument]["Wavelength"]
 
     def get_raw_file_path(self, instrument):
+        """
+        Get the raw data file path for a given instrument.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+
+        Returns
+        -------
+        str
+            File path to raw data.
+        """
+
         inst = beamlines[instrument]
 
         return os.path.join(
@@ -178,6 +294,22 @@ class UBModel(NeuXtalVizModel):
         )
 
     def get_shared_file_path(self, instrument, ipts):
+        """
+        Get the shared file path for a given instrument and IPTS.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+        ipts : str
+            IPTS number.
+
+        Returns
+        -------
+        str
+            Shared file path.
+        """
+
         inst = beamlines[instrument]
 
         if ipts is not None:
@@ -196,6 +328,20 @@ class UBModel(NeuXtalVizModel):
         return filepath
 
     def get_calibration_file_path(self, instrument):
+        """
+        Get the calibration file path for a given instrument.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+
+        Returns
+        -------
+        str
+            Calibration file path.
+        """
+
         inst = beamlines[instrument]
 
         return os.path.join(
@@ -207,6 +353,20 @@ class UBModel(NeuXtalVizModel):
         )
 
     def get_vanadium_file_path(self, instrument):
+        """
+        Get the vanadium calibration file path for a given instrument.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+
+        Returns
+        -------
+        str
+            Vanadium calibration file path.
+        """
+
         inst = beamlines[instrument]
 
         return os.path.join(
@@ -214,6 +374,23 @@ class UBModel(NeuXtalVizModel):
         )
 
     def load_data(self, instrument, IPTS, runs, exp, time_stop):
+        """
+        Load experimental data for a given instrument and run parameters.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+        IPTS : str
+            IPTS number.
+        runs : list
+            List of run numbers.
+        exp : str
+            Experiment identifier.
+        time_stop : float
+            Time to stop loading data.
+        """
+
         filepath = self.get_raw_file_path(instrument)
 
         inst = beamlines[instrument]
@@ -304,6 +481,19 @@ class UBModel(NeuXtalVizModel):
                 return True
 
     def calibrate_data(self, instrument, det_cal, tube_cal):
+        """
+        Calibrate the loaded data using detector and tube calibration files.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+        det_cal : str
+            Detector calibration file.
+        tube_cal : str
+            Tube calibration file.
+        """
+
         filepath = self.get_raw_file_path(instrument)
 
         if mtd.doesExist("data"):
@@ -340,11 +530,35 @@ class UBModel(NeuXtalVizModel):
                         LoadIsawDetCal(InputWorkspace="data", Filename=det_cal)
 
     def get_number_workspaces(self):
+        """
+        Get the number of workspaces in the current Mantid session.
+
+        Returns
+        -------
+        int
+            Number of workspaces.
+        """
+
         if mtd.doesExist("data"):
             input_ws_names = mtd["data"].getNames()
             return len(input_ws_names)
 
     def convert_data(self, instrument, wavelength, lorentz, min_d=None):
+        """
+        Convert loaded data to Q-space using Mantid algorithms.
+
+        Parameters
+        ----------
+        instrument : str
+            Instrument identifier.
+        wavelength : float
+            Wavelength in angstroms.
+        lorentz : bool
+            Whether to apply Lorentz correction.
+        min_d : float, optional
+            Minimum d-spacing. Default is None.
+        """
+
         filepath = self.get_raw_file_path(instrument)
 
         if min_d is not None:
@@ -544,6 +758,21 @@ class UBModel(NeuXtalVizModel):
             self.gamma = np.rad2deg(np.arctan2(kf_x, kf_z))
 
     def add_peak(self, ind, val, horz, vert):
+        """
+        Add a peak to the peaks table.
+
+        Parameters
+        ----------
+        ind : int
+            Index of the run.
+        val : float
+            Peak value (e.g., d-spacing or angle).
+        horz : float
+            Horizontal coordinate (e.g., angle or hkl).
+        vert : float
+            Vertical coordinate (e.g., angle or hkl).
+        """
+
         R = self.Rs[ind]
 
         if type(self.lamda) is float:
@@ -565,6 +794,22 @@ class UBModel(NeuXtalVizModel):
         mtd["ub_peaks"].addPeak(peak)
 
     def calculate_hkl_position(self, ind, h, k, l):
+        """
+        Calculate the HKL position for a given peak index and Miller indices.
+
+        Parameters
+        ----------
+        ind : int
+            Index of the peak.
+        h, k, l : int
+            Miller indices.
+
+        Returns
+        -------
+        tuple
+            Calculated values (x, gamma, nu) for the given HKL.
+        """
+
         if self.has_UB():
             UB = self.get_UB()
             Q = 2 * np.pi * UB @ np.array([h, k, l])
@@ -598,6 +843,26 @@ class UBModel(NeuXtalVizModel):
             return x, gamma, nu
 
     def roi_scan_to_hkl(self, ind, val, horz, vert):
+        """
+        Convert a ROI scan position to HKL coordinates.
+
+        Parameters
+        ----------
+        ind : int
+            Index of the run.
+        val : float
+            Peak value (e.g., d-spacing or angle).
+        horz : float
+            Horizontal coordinate (e.g., angle or hkl).
+        vert : float
+            Vertical coordinate (e.g., angle or hkl).
+
+        Returns
+        -------
+        np.ndarray
+            Calculated HKL coordinates.
+        """
+
         if self.has_UB():
             R = self.Rs[ind]
 
@@ -621,6 +886,22 @@ class UBModel(NeuXtalVizModel):
             return hkl
 
     def calculate_instrument_view(self, ind, d_min, d_max):
+        """
+        Calculate the instrument view for a given peak index and d-spacing range.
+
+        Parameters
+        ----------
+        ind : int
+            Index of the peak.
+        d_min, d_max : float
+            Minimum and maximum d-spacing values.
+
+        Returns
+        -------
+        dict
+            Instrument view data including d, gamma, nu, and counts.
+        """
+
         inst_view = {}
 
         R = self.Rs[ind]
@@ -658,6 +939,24 @@ class UBModel(NeuXtalVizModel):
         self.inst_view = inst_view
 
     def extract_roi(self, horz, vert, horz_roi, vert_roi, val):
+        """
+        Extract a region of interest (ROI) from the instrument view.
+
+        Parameters
+        ----------
+        horz, vert : float
+            Horizontal and vertical coordinates for the ROI center.
+        horz_roi, vert_roi : float
+            Horizontal and vertical ROI sizes.
+        val : float
+            Value at the ROI center.
+
+        Returns
+        -------
+        dict
+            Extracted ROI data including label, x, and y values.
+        """
+
         inst_view = self.inst_view
 
         roi_view = {}
@@ -727,9 +1026,40 @@ class UBModel(NeuXtalVizModel):
         self.roi_view = roi_view
 
     def is_sliced(self):
+        """
+        Check if the data has been sliced.
+
+        Returns
+        -------
+        bool
+            True if data is sliced, False otherwise.
+        """
+
         return mtd.doesExist("slice")
 
     def get_slice_info(self, U, V, W, normal, value, thickness, width):
+        """
+        Get the slicing information for a given normal and value.
+
+        Parameters
+        ----------
+        U, V, W : list
+            Normalized direction cosines for the slice.
+        normal : list
+            Normal vector for the slice.
+        value : float
+            Value at which to slice.
+        thickness : float
+            Thickness of the slice.
+        width : float
+            Width of the output histogram bins.
+
+        Returns
+        -------
+        dict
+            Dictionary with slice information including extents, bins, and transform.
+        """
+
         UB = self.get_UB()
 
         if self.has_UB() and self.has_Q():
@@ -851,6 +1181,22 @@ class UBModel(NeuXtalVizModel):
             return slice_dict
 
     def calculate_clim(self, data, method="normal"):
+        """
+        Calculate the color limits for the given data using the specified method.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            Input data for which to calculate color limits.
+        method : str, optional
+            Method for calculating limits ('normal', 'boxplot', or 'manual'). Default is 'normal'.
+
+        Returns
+        -------
+        tuple
+            Lower and upper color limits.
+        """
+
         trans = data.copy()
         trans[~np.isfinite(trans)] = np.nan
         trans[np.isclose(trans, 0)] = np.nan
@@ -887,9 +1233,27 @@ class UBModel(NeuXtalVizModel):
         return trans
 
     def get_has_Q_vol(self):
+        """
+        Check if the Q volume data exists.
+
+        Returns
+        -------
+        bool
+            True if Q volume data exists, False otherwise.
+        """
+
         return mtd.doesExist("Q3D")
 
     def get_Q_info(self):
+        """
+        Extract Q-space information from the model.
+
+        Returns
+        -------
+        dict
+            Dictionary containing Q-space signal, min/max limits, spacing, and optionally x, y, z coordinates.
+        """
+
         Q_dict = {}
 
         if self.get_has_Q_vol():
@@ -963,6 +1327,15 @@ class UBModel(NeuXtalVizModel):
         return Q_dict if len(Q_dict.keys()) > 0 else None
 
     def get_lattice_constants(self):
+        """
+        Get the lattice constants from the oriented lattice.
+
+        Returns
+        -------
+        list
+            List of lattice constants [a, b, c, alpha, beta, gamma].
+        """
+
         if self.has_UB():
             ol = mtd[self.cell].sample().getOrientedLattice()
 
@@ -971,6 +1344,15 @@ class UBModel(NeuXtalVizModel):
             return np.array(params).round(8).tolist()
 
     def get_lattice_constant_errors(self):
+        """
+        Get the errors in the lattice constants from the oriented lattice.
+
+        Returns
+        -------
+        list
+            List of errors in lattice constants [error_a, error_b, error_c, error_alpha, error_beta, error_gamma].
+        """
+
         if self.has_UB():
             ol = mtd[self.cell].sample().getOrientedLattice()
 
@@ -986,6 +1368,20 @@ class UBModel(NeuXtalVizModel):
             return np.array(params).round(8).tolist()
 
     def simplify_vector(self, vec):
+        """
+        Simplify a vector to its primitive integer form.
+
+        Parameters
+        ----------
+        vec : np.ndarray
+            Input vector.
+
+        Returns
+        -------
+        np.ndarray
+            Simplified integer vector.
+        """
+
         vec = vec / np.linalg.norm(vec)
 
         vec *= 10
@@ -995,6 +1391,15 @@ class UBModel(NeuXtalVizModel):
         return vec // np.gcd.reduce(vec)
 
     def get_sample_directions(self):
+        """
+        Get the sample directions from the UB matrix.
+
+        Returns
+        -------
+        list
+            List of simplified sample direction vectors.
+        """
+
         if self.has_UB():
             UB = mtd[self.cell].sample().getOrientedLattice().getUB()
 
@@ -1003,6 +1408,10 @@ class UBModel(NeuXtalVizModel):
             return [self.simplify_vector(vec) for vec in vecs]
 
     def copy_UB_from_peaks(self):
+        """
+        Copy the UB matrix from the peaks workspace to the cell workspace.
+        """
+
         CopySample(
             InputWorkspace=self.table,
             OutputWorkspace=self.cell,
@@ -1013,6 +1422,10 @@ class UBModel(NeuXtalVizModel):
         )
 
     def copy_UB_to_peaks(self):
+        """
+        Copy the UB matrix from the cell workspace to the peaks workspace.
+        """
+
         CopySample(
             InputWorkspace=self.cell,
             OutputWorkspace=self.table,
@@ -1023,6 +1436,10 @@ class UBModel(NeuXtalVizModel):
         )
 
     def copy_UB_from_Q(self):
+        """
+        Copy the UB matrix from the Q workspace to the cell workspace.
+        """
+
         CopySample(
             InputWorkspace=self.Q,
             OutputWorkspace=self.cell,
@@ -1033,6 +1450,10 @@ class UBModel(NeuXtalVizModel):
         )
 
     def copy_UB_to_Q(self):
+        """
+        Copy the UB matrix from the cell workspace to the Q workspace.
+        """
+
         CopySample(
             InputWorkspace=self.cell,
             OutputWorkspace=self.Q,
@@ -1538,6 +1959,10 @@ class UBModel(NeuXtalVizModel):
         )
 
     def clear_intensity(self):
+        """
+        Clear the intensity values of all peaks in the peaks table.
+        """
+
         for peak in mtd[self.table]:
             peak.setIntensity(0)
             peak.setSigmaIntensity(0)
@@ -1888,112 +2313,36 @@ class UBModel(NeuXtalVizModel):
         Parameters
         ----------
         filename : str
-            Name of peaks file with extension .nxs.
-
+            Name of peaks file (can be .nxs or .integrate, .peaks, etc.).
         """
 
-        LoadNexus(Filename=filename, OutputWorkspace=self.table)
+        if filename.endswith('.nxs'):
+            LoadNexus(Filename=filename, OutputWorkspace=self.table)
+        else:
+            LoadIsawPeaks(Filename=filename, OutputWorkspace=self.table)
 
     def save_peaks(self, filename):
         """
-        Save peaks file.
+        Save the current peaks table to a file.
 
         Parameters
         ----------
         filename : str
             Name of peaks file with extension .nxs.
-
         """
 
         SaveNexus(Filename=filename, InputWorkspace=self.table)
 
-    def delete_peaks(self, peaks):
-        """
-        Remove peaks.
-
-        Parameters
-        ----------
-        peaks : str
-            Name of peaks table to be added.
-
-        """
-
-        if mtd.doesExist(peaks):
-            DeleteWorkspace(Workspace=peaks)
-
-    def filter_peaks(self, name, operator, value):
-        """
-        Filter out peaks based on value and operator.
-
-        Parameters
-        ----------
-        name : str
-            Filter name.
-        operator : float
-            Filter operator.
-        value : float
-            The filter value.
-
-        """
-
-        FilterPeaks(
-            InputWorkspace=self.table,
-            OutputWorkspace=self.table,
-            FilterVariable=variable[name],
-            FilterValue=value,
-            Operator=operator,
-            Criterion="!=",
-            BankName="None",
-        )
-
-    def get_d_min(self):
-        d_min = 0.7
-        if self.has_peaks():
-            for peak in mtd[self.table]:
-                d_spacing = peak.getDSpacing()
-                if d_spacing < d_min:
-                    d_min = d_spacing
-        return d_min
-
-    def avoid_aluminum_contamination(self, d_min, d_max, delta=0.1):
-        aluminum = CrystalStructure(
-            "4.05 4.05 4.05", "F m -3 m", "Al 0 0 0 1.0 0.005"
-        )
-
-        generator = ReflectionGenerator(aluminum)
-
-        hkls = generator.getUniqueHKLsUsingFilter(
-            d_min, d_max, ReflectionConditionFilter.StructureFactor
-        )
-
-        ds = list(generator.getDValues(hkls))
-
-        if self.has_peaks():
-            for peak in mtd[self.table]:
-                d_spacing = peak.getDSpacing()
-                Q_mod = 2 * np.pi / d_spacing
-                for d in ds:
-                    Q = 2 * np.pi / d
-                    if Q - delta < Q_mod < Q + delta or d_spacing > d_max:
-                        peak.setRunNumber(-1)
-
-            FilterPeaks(
-                InputWorkspace=self.table,
-                OutputWorkspace=self.table,
-                FilterVariable="RunNumber",
-                FilterValue="-1",
-                Operator="!=",
-                Criterion="!=",
-                BankName="None",
-            )
-
-    def get_modulation_info(self):
-        if self.has_peaks() and self.has_UB():
-            ol = mtd[self.cell].sample().getOrientedLattice()
-
-            return [ol.getModVec(i) for i in range(3)]
-
     def get_peak_info(self):
+        """
+        Extract detailed information for each peak in the current table.
+
+        Returns
+        -------
+        list of dict
+            List of dictionaries with peak properties (hkl, d-spacing, intensity, etc.).
+        """
+
         if self.has_peaks():
             banks = mtd[self.table].column("BankName")
 
@@ -2024,6 +2373,20 @@ class UBModel(NeuXtalVizModel):
             return peak_info
 
     def get_peak(self, i):
+        """
+        Get a specific peak's information by index.
+
+        Parameters
+        ----------
+        i : int
+            Index of the peak.
+
+        Returns
+        -------
+        dict or None
+            Peak information dictionary or None if index is out of range.
+        """
+
         if self.peak_info is not None:
             if i >= 0 and i < len(self.peak_info):
                 return self.peak_info[i]
@@ -2031,6 +2394,24 @@ class UBModel(NeuXtalVizModel):
     def calculate_fractional(
         self, mod_vec_1, mod_vec_2, mod_vec_3, int_hkl, int_mnp
     ):
+        """
+        Calculate the fractional coordinates from the given modulation vectors and integer coordinates.
+
+        Parameters
+        ----------
+        mod_vec_1, mod_vec_2, mod_vec_3 : list
+            Modulation vectors.
+        int_hkl : list
+            Integer HKL coordinates.
+        int_mnp : list
+            Integer MNP coordinates.
+
+        Returns
+        -------
+        np.ndarray
+            Calculated fractional coordinates.
+        """
+
         if self.has_UB():
             ol = mtd[self.cell].sample().getOrientedLattice()
 
@@ -2043,6 +2424,22 @@ class UBModel(NeuXtalVizModel):
         return np.array(int_hkl) + np.dot(delta_hkl, int_mnp)
 
     def calculate_integer(self, mod_vec_1, mod_vec_2, mod_vec_3, hkl):
+        """
+        Calculate the integer coordinates from the given modulation vectors and HKL coordinates.
+
+        Parameters
+        ----------
+        mod_vec_1, mod_vec_2, mod_vec_3 : list
+            Modulation vectors.
+        hkl : list
+            HKL coordinates.
+
+        Returns
+        -------
+        tuple
+            Best integer coordinates (int_hkl, int_mnp) that minimize the error.
+        """
+
         if self.has_UB():
             ol = mtd[self.cell].sample().getOrientedLattice()
 
@@ -2073,6 +2470,21 @@ class UBModel(NeuXtalVizModel):
         return best_solution
 
     def set_peak(self, i, hkl, int_hkl, int_mnp):
+        """
+        Set the HKL, integer HKL, and integer MNP values for a specific peak.
+
+        Parameters
+        ----------
+        i : int
+            Index of the peak.
+        hkl : list
+            HKL coordinates.
+        int_hkl : list
+            Integer HKL coordinates.
+        int_mnp : list
+            Integer MNP coordinates.
+        """
+
         peak = mtd[self.table].getPeak(i)
 
         peak.setHKL(*hkl)
@@ -2080,6 +2492,24 @@ class UBModel(NeuXtalVizModel):
         peak.setIntMNP(V3D(*np.array(int_mnp).astype(float).tolist()))
 
     def calculate_peaks(self, hkl_1, hkl_2, a, b, c, alpha, beta, gamma):
+        """
+        Calculate d-spacing and angle between two HKL planes.
+
+        Parameters
+        ----------
+        hkl_1, hkl_2 : list
+            Miller indices for the two planes.
+        a, b, c : float
+            Lattice constants in angstroms.
+        alpha, beta, gamma : float
+            Lattice angles in degrees.
+
+        Returns
+        -------
+        tuple
+            d-spacing for the two planes and the angle between them.
+        """
+
         uc = UnitCell(a, b, c, alpha, beta, gamma)
 
         d_1 = d_2 = phi_12 = None
@@ -2093,6 +2523,24 @@ class UBModel(NeuXtalVizModel):
         return d_1, d_2, phi_12
 
     def cluster_peaks(self, peak_info, eps=0.025, min_samples=15):
+        """
+        Cluster peaks using DBSCAN algorithm.
+
+        Parameters
+        ----------
+        peak_info : dict
+            Dictionary containing peak information (coordinates, inverse transform, etc.).
+        eps : float, optional
+            The maximum distance between two samples for one to be considered as in the neighborhood of the other. Default is 0.025.
+        min_samples : int, optional
+            The number of samples in a neighborhood for a point to be considered as a core point. Default is 15.
+
+        Returns
+        -------
+        bool
+            True if clustering is successful, False otherwise.
+        """
+
         T_inv = peak_info["inverse"]
 
         points = np.array(peak_info["coordinates"])
@@ -2156,6 +2604,15 @@ class UBModel(NeuXtalVizModel):
         return success
 
     def get_cluster_info(self):
+        """
+        Get cluster information for peaks based on UB and peak table.
+
+        Returns
+        -------
+        dict
+            Dictionary with cluster coordinates, points, numbers, translation vectors, and transforms.
+        """
+
         if self.has_UB() and self.has_peaks():
             UB = self.get_UB()
             peak_dict = {}
