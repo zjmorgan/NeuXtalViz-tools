@@ -1,5 +1,34 @@
+"""
+NeuXtalVizPresenter: Presenter class for connecting the view and model in NeuXtalViz.
+
+This module defines the NeuXtalVizPresenter class, which acts as the mediator between the user interface (view) and the underlying data/model logic. It handles user actions, updates the view based on model state, and manages status/progress reporting for the main visualization window.
+
+Classes
+-------
+NeuXtalVizPresenter
+    Presenter for the main visualization window, connecting view events to model logic and updating the UI accordingly.
+"""
+
+
 class NeuXtalVizPresenter:
+    """
+    Presenter for the main visualization window in NeuXtalViz.
+
+    Connects user interface events to model logic, updates the view based on model state, and manages status and progress reporting.
+    """
+
     def __init__(self, view, model):
+        """
+        Initialize the presenter and connect view signals to presenter methods.
+
+        Parameters
+        ----------
+        view : object
+            The view/UI instance.
+        model : object
+            The model instance containing data and logic.
+        """
+
         self.view = view
         self.model = model
 
@@ -17,34 +46,31 @@ class NeuXtalVizPresenter:
 
     def update_status(self, status):
         """
-        Update status information.
+        Update status information in the view.
 
         Parameters
         ----------
         status : str
-            Information.
-
+            Status message to display.
         """
 
         self.view.set_info(status)
 
     def update_progress(self, progress):
         """
-        Update progress step.
+        Update progress step in the view.
 
         Parameters
         ----------
         progress : int
-            Step.
-
+            Progress step or value.
         """
 
         self.view.set_step(progress)
 
     def update_invalid(self):
         """
-        Indicate invalid.
-
+        Indicate invalid parameters to the user and reset progress.
         """
 
         self.update_status("Invalid parameters.")
@@ -52,13 +78,12 @@ class NeuXtalVizPresenter:
 
     def update_complete(self, status="Complete!"):
         """
-        Indicate complete.
+        Indicate completion to the user and reset progress.
 
         Parameters
         ----------
-        status : str
-            Information.
-
+        status : str, optional
+            Completion message (default is "Complete!").
         """
 
         self.update_status(status)
@@ -66,15 +91,14 @@ class NeuXtalVizPresenter:
 
     def update_processing(self, status="Processing...", progress=1):
         """
-        Indicate processing.
+        Indicate processing state to the user and update progress.
 
         Parameters
         ----------
-        status : str
-            Information.
-        progress : int
-            Step.
-
+        status : str, optional
+            Processing message (default is "Processing...").
+        progress : int, optional
+            Progress step or value (default is 1).
         """
 
         self.update_status(status)
@@ -82,8 +106,7 @@ class NeuXtalVizPresenter:
 
     def update_oriented_lattice(self):
         """
-        Update oriented lattice parameter display.
-
+        Update the oriented lattice parameter display in the view.
         """
 
         ol = self.model.get_oriented_lattice_parameters()
@@ -92,8 +115,7 @@ class NeuXtalVizPresenter:
 
     def change_lattice(self):
         """
-        Enable or disable reciprocal lattice.
-
+        Enable or disable reciprocal lattice display in the view.
         """
 
         T = self.model.get_transform(self.view.reciprocal_lattice())
@@ -102,8 +124,7 @@ class NeuXtalVizPresenter:
 
     def save_screenshot(self):
         """
-        Save image.
-
+        Save a screenshot of the current view to a file.
         """
 
         filename = self.view.save_screenshot_file_dialog()
@@ -113,8 +134,7 @@ class NeuXtalVizPresenter:
 
     def view_manual(self):
         """
-        Manual axis view.
-
+        Set the view to a manually specified axis direction.
         """
 
         indices = self.view.get_manual_axis_indices()
@@ -126,8 +146,7 @@ class NeuXtalVizPresenter:
 
     def view_up_manual(self):
         """
-        Manual axis up view.
-
+        Set the view's up direction to a manually specified axis.
         """
 
         indices = self.view.get_manual_axis_up_indices()
@@ -139,8 +158,7 @@ class NeuXtalVizPresenter:
 
     def view_ab_star(self):
         """
-        :math:`c`-axis view.
-
+        Set the view to the c-axis direction (reciprocal lattice).
         """
 
         vecs = self.model.ab_star_axes()
@@ -149,8 +167,7 @@ class NeuXtalVizPresenter:
 
     def view_bc_star(self):
         """
-        :math:`a`-axis view.
-
+        Set the view to the a-axis direction (reciprocal lattice).
         """
 
         vecs = self.model.bc_star_axes()
@@ -159,8 +176,7 @@ class NeuXtalVizPresenter:
 
     def view_ca_star(self):
         """
-        :math:`b`-axis view.
-
+        Set the view to the b-axis direction (reciprocal lattice).
         """
 
         vecs = self.model.ca_star_axes()
@@ -169,8 +185,7 @@ class NeuXtalVizPresenter:
 
     def view_ab(self):
         """
-        :math:`c^\ast`-axis view.
-
+        Set the view to the c* direction (real lattice).
         """
 
         vecs = self.model.ab_axes()
@@ -179,8 +194,7 @@ class NeuXtalVizPresenter:
 
     def view_bc(self):
         """
-        :math:`a^\ast`-axis view.
-
+        Set the view to the a* direction (real lattice).
         """
 
         vecs = self.model.bc_axes()
@@ -189,8 +203,7 @@ class NeuXtalVizPresenter:
 
     def view_ca(self):
         """
-        :math:`b^\ast`-axis view.
-
+        Set the view to the b* direction (real lattice).
         """
 
         vecs = self.model.ca_axes()
