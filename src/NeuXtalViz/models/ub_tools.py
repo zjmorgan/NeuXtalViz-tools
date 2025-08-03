@@ -2316,7 +2316,7 @@ class UBModel(NeuXtalVizModel):
             Name of peaks file (can be .nxs or .integrate, .peaks, etc.).
         """
 
-        if filename.endswith('.nxs'):
+        if filename.endswith(".nxs"):
             LoadNexus(Filename=filename, OutputWorkspace=self.table)
         else:
             LoadIsawPeaks(Filename=filename, OutputWorkspace=self.table)

@@ -330,7 +330,9 @@ class UBView(NeuXtalVizWidget):
         self.instrument_combo.addItem("SNAP")
         self.instrument_combo.addItem("WAND²")
         self.instrument_combo.addItem("DEMAND")
-        self.instrument_combo.setToolTip("Select the instrument for data conversion.")
+        self.instrument_combo.setToolTip(
+            "Select the instrument for data conversion."
+        )
 
         ipts_label = QLabel("IPTS:")
         exp_label = QLabel("Experiment:")
@@ -377,7 +379,9 @@ class UBView(NeuXtalVizWidget):
 
         self.filter_time_line = QLineEdit("")
         self.filter_time_line.setValidator(validator)
-        self.filter_time_line.setToolTip("Maximum time (s) for filtering events.")
+        self.filter_time_line.setToolTip(
+            "Maximum time (s) for filtering events."
+        )
 
         self.cal_browse_button = QPushButton("Detector", self)
         self.tube_browse_button = QPushButton("Tube", self)
@@ -406,7 +410,9 @@ class UBView(NeuXtalVizWidget):
 
         self.lorentz_box = QCheckBox("Lorentz Correction", self)
         self.lorentz_box.setChecked(True)
-        self.lorentz_box.setToolTip("Apply Lorentz correction during conversion.")
+        self.lorentz_box.setToolTip(
+            "Apply Lorentz correction during conversion."
+        )
 
         convert_to_q_action_layout = QHBoxLayout()
         convert_to_q_action_layout.addWidget(self.convert_to_q_button)
@@ -457,7 +463,9 @@ class UBView(NeuXtalVizWidget):
 
         self.density_threshold_line = QLineEdit("100")
         self.density_threshold_line.setValidator(validator)
-        self.density_threshold_line.setToolTip("Minimum density threshold for peak finding.")
+        self.density_threshold_line.setToolTip(
+            "Minimum density threshold for peak finding."
+        )
 
         notation = QDoubleValidator.StandardNotation
 
@@ -465,7 +473,9 @@ class UBView(NeuXtalVizWidget):
 
         self.min_distance_line = QLineEdit("0.20")
         self.min_distance_line.setValidator(validator)
-        self.min_distance_line.setToolTip("Minimum distance between peaks (Å⁻¹).")
+        self.min_distance_line.setToolTip(
+            "Minimum distance between peaks (Å⁻¹)."
+        )
 
         validator = QDoubleValidator(0.1, 100, 4, notation=notation)
 
@@ -477,7 +487,9 @@ class UBView(NeuXtalVizWidget):
 
         self.find_edge_line = QLineEdit("0")
         self.find_edge_line.setValidator(validator)
-        self.find_edge_line.setToolTip("Number of edge pixels to exclude from peak finding.")
+        self.find_edge_line.setToolTip(
+            "Number of edge pixels to exclude from peak finding."
+        )
 
         find_params_layout = QGridLayout()
 
@@ -528,7 +540,9 @@ class UBView(NeuXtalVizWidget):
 
         self.index_sat_tolerance_line = QLineEdit("0.1")
         self.index_sat_tolerance_line.setValidator(validator)
-        self.index_sat_tolerance_line.setToolTip("Tolerance for satellite peak indexing.")
+        self.index_sat_tolerance_line.setToolTip(
+            "Tolerance for satellite peak indexing."
+        )
 
         index_params_layout = QGridLayout()
 
@@ -567,7 +581,9 @@ class UBView(NeuXtalVizWidget):
         self.centering_combo.addItem("B")
         self.centering_combo.addItem("C")
         self.centering_combo.addItem("H")
-        self.centering_combo.setToolTip("Select lattice centering for peak prediction.")
+        self.centering_combo.setToolTip(
+            "Select lattice centering for peak prediction."
+        )
 
         min_d_unit_label = QLabel("Å")
 
@@ -588,13 +604,17 @@ class UBView(NeuXtalVizWidget):
 
         self.min_sat_d_line = QLineEdit("1.0")
         self.min_sat_d_line.setValidator(validator)
-        self.min_sat_d_line.setToolTip("Minimum d-spacing for satellite peaks.")
+        self.min_sat_d_line.setToolTip(
+            "Minimum d-spacing for satellite peaks."
+        )
 
         validator = QIntValidator(0, 64, self)
 
         self.predict_edge_line = QLineEdit("0")
         self.predict_edge_line.setValidator(validator)
-        self.predict_edge_line.setToolTip("Number of edge pixels to exclude from prediction.")
+        self.predict_edge_line.setToolTip(
+            "Number of edge pixels to exclude from prediction."
+        )
 
         predict_tab = QWidget()
         predict_tab_layout = QVBoxLayout()
@@ -612,7 +632,9 @@ class UBView(NeuXtalVizWidget):
         predict_params_layout.addWidget(self.predict_sat_box, 2, 2)
 
         self.predict_button = QPushButton("Predict", self)
-        self.predict_button.setToolTip("Predict peak positions based on UB and centering.")
+        self.predict_button.setToolTip(
+            "Predict peak positions based on UB and centering."
+        )
 
         predict_action_layout = QHBoxLayout()
         predict_action_layout.addWidget(self.predict_button)
@@ -630,7 +652,9 @@ class UBView(NeuXtalVizWidget):
 
         self.adaptive_box = QCheckBox("Adaptive Envelope", self)
         self.adaptive_box.setChecked(True)
-        self.adaptive_box.setToolTip("Enable adaptive envelope for integration.")
+        self.adaptive_box.setToolTip(
+            "Enable adaptive envelope for integration."
+        )
 
         radius_label = QLabel("Radius:")
         inner_label = QLabel("Inner Factor:")
@@ -751,13 +775,17 @@ class UBView(NeuXtalVizWidget):
 
         self.calculate_tolerance_line = QLineEdit("0.1")
         self.calculate_tolerance_line.setValidator(validator)
-        self.calculate_tolerance_line.setToolTip("Tolerance for UB calculation.")
+        self.calculate_tolerance_line.setToolTip(
+            "Tolerance for UB calculation."
+        )
 
         max_scalar_error_label = QLabel("Max Scalar Error:")
 
         self.max_scalar_error_line = QLineEdit("0.2")
         self.max_scalar_error_line.setValidator(validator)
-        self.max_scalar_error_line.setToolTip("Maximum scalar error for cell search.")
+        self.max_scalar_error_line.setToolTip(
+            "Maximum scalar error for cell search."
+        )
 
         calculate_tab = QWidget()
         calculate_tab_layout = QVBoxLayout()
@@ -792,8 +820,12 @@ class UBView(NeuXtalVizWidget):
 
         self.min_const_line.setValidator(validator)
         self.max_const_line.setValidator(validator)
-        self.min_const_line.setToolTip("Minimum lattice constant for cell search.")
-        self.max_const_line.setToolTip("Maximum lattice constant for cell search.")
+        self.min_const_line.setToolTip(
+            "Minimum lattice constant for cell search."
+        )
+        self.max_const_line.setToolTip(
+            "Maximum lattice constant for cell search."
+        )
 
         const_layout = QHBoxLayout()
         const_layout.addWidget(min_const_label)
@@ -834,7 +866,9 @@ class UBView(NeuXtalVizWidget):
 
         self.transform_tolerance_line = QLineEdit("0.1")
         self.transform_tolerance_line.setValidator(validator)
-        self.transform_tolerance_line.setToolTip("Tolerance for lattice transformation.")
+        self.transform_tolerance_line.setToolTip(
+            "Tolerance for lattice transformation."
+        )
 
         self.lattice_combo = QComboBox(self)
         self.lattice_combo.addItem("Triclinic")
@@ -844,12 +878,16 @@ class UBView(NeuXtalVizWidget):
         self.lattice_combo.addItem("Rhombohedral")
         self.lattice_combo.addItem("Hexagonal")
         self.lattice_combo.addItem("Cubic")
-        self.lattice_combo.setToolTip("Select lattice system for transformation.")
+        self.lattice_combo.setToolTip(
+            "Select lattice system for transformation."
+        )
 
         self.symmetry_combo = QComboBox(self)
         self.symmetry_combo.addItem("x,y,z")
         self.symmetry_combo.addItem("-x,-y,-z")
-        self.symmetry_combo.setToolTip("Select symmetry operation for transformation.")
+        self.symmetry_combo.setToolTip(
+            "Select symmetry operation for transformation."
+        )
 
         notation = QDoubleValidator.StandardNotation
 
@@ -949,7 +987,9 @@ class UBView(NeuXtalVizWidget):
         self.optimize_combo.addItem("Rhombohedral")
         self.optimize_combo.addItem("Hexagonal")
         self.optimize_combo.addItem("Cubic")
-        self.optimize_combo.setToolTip("Select refinement constraints or lattice system.")
+        self.optimize_combo.setToolTip(
+            "Select refinement constraints or lattice system."
+        )
 
         refine_tab = QWidget()
         refine_tab_layout = QVBoxLayout()
@@ -1026,7 +1066,9 @@ class UBView(NeuXtalVizWidget):
         self.phi_line.setEnabled(False)
 
         self.calculate = QPushButton("Calculate", self)
-        self.calculate.setToolTip("Calculate d-spacings and angle between peaks.")
+        self.calculate.setToolTip(
+            "Calculate d-spacings and angle between peaks."
+        )
 
         calculator_layout.addWidget(h_label, 0, 1, Qt.AlignCenter)
         calculator_layout.addWidget(k_label, 0, 2, Qt.AlignCenter)
@@ -1061,7 +1103,9 @@ class UBView(NeuXtalVizWidget):
         self.peaks_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.peaks_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.peaks_table.setSortingEnabled(True)
-        self.peaks_table.setToolTip("Table of indexed peaks and their properties.")
+        self.peaks_table.setToolTip(
+            "Table of indexed peaks and their properties."
+        )
 
         extended_info = QGridLayout()
 
@@ -1331,7 +1375,9 @@ class UBView(NeuXtalVizWidget):
 
         self.slice_thickness_line = QLineEdit("0.1")
         self.slice_thickness_line.setValidator(validator)
-        self.slice_thickness_line.setToolTip("Enter the slice thickness value.")
+        self.slice_thickness_line.setToolTip(
+            "Enter the slice thickness value."
+        )
 
         validator = QDoubleValidator(0.005, 0.5, 5, notation=notation)
 
@@ -1344,7 +1390,9 @@ class UBView(NeuXtalVizWidget):
         self.slice_scale_combo = QComboBox(self)
         self.slice_scale_combo.addItem("Linear")
         self.slice_scale_combo.addItem("Log")
-        self.slice_scale_combo.setToolTip("Select the scale for the slice view.")
+        self.slice_scale_combo.setToolTip(
+            "Select the scale for the slice view."
+        )
 
         convert_to_hkl_action_layout = QHBoxLayout()
         convert_to_hkl_action_layout.addWidget(self.convert_to_hkl_button)
@@ -1418,7 +1466,9 @@ class UBView(NeuXtalVizWidget):
         self.check_l_line = QLineEdit()
 
         self.check_hkl_button = QPushButton("Check hkl", self)
-        self.check_hkl_button.setToolTip("Check the validity of the hkl indices.")
+        self.check_hkl_button.setToolTip(
+            "Check the validity of the hkl indices."
+        )
 
         notation = QDoubleValidator.StandardNotation
 
@@ -1454,17 +1504,23 @@ class UBView(NeuXtalVizWidget):
 
         self.horizontal_line = QLineEdit("0")
         self.horizontal_line.setValidator(validator)
-        self.horizontal_line.setToolTip("Horizontal angle for the detector view.")
+        self.horizontal_line.setToolTip(
+            "Horizontal angle for the detector view."
+        )
 
         validator = QDoubleValidator(0, 180, 5, notation=notation)
 
         self.vertical_roi_line = QLineEdit("2")
         self.vertical_roi_line.setValidator(validator)
-        self.vertical_roi_line.setToolTip("Vertical ROI size for the detector view.")
+        self.vertical_roi_line.setToolTip(
+            "Vertical ROI size for the detector view."
+        )
 
         self.horizontal_roi_line = QLineEdit("2")
         self.horizontal_roi_line.setValidator(validator)
-        self.horizontal_roi_line.setToolTip("Horizontal ROI size for the detector view.")
+        self.horizontal_roi_line.setToolTip(
+            "Horizontal ROI size for the detector view."
+        )
 
         angle_layout = QHBoxLayout()
         angle_layout.addWidget(horizontal_label)
@@ -1935,8 +1991,6 @@ class UBView(NeuXtalVizWidget):
     def load_UB_file_dialog(self, path=""):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-
-       
 
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.AnyFile)

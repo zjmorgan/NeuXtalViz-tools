@@ -23,4 +23,4 @@ dependencies:
   - black
   - pip:
     - pyqtdarktheme
-    -pyoncat
+    - pyoncat

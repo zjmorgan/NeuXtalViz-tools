@@ -5,7 +5,7 @@ from mantid.simpleapi import mtd
 from NeuXtalViz.models.ub_tools import UBModel
 
 # Use absolute paths to ensure test data is found regardless of working directory
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data"))
 peaks_file = os.path.join(DATA_DIR, "26079_Niggli.integrate")
 ub_file = os.path.join(DATA_DIR, "26079_Niggli.mat")
 
@@ -25,5 +25,7 @@ def test_load_UB():
     """
     ubm = UBModel()
     ubm.load_UB(ub_file)
-    assert mtd["ub_lattice"].sample().getOrientedLattice().getUB().shape == (3, 3)
-
+    assert mtd["ub_lattice"].sample().getOrientedLattice().getUB().shape == (
+        3,
+        3,
+    )

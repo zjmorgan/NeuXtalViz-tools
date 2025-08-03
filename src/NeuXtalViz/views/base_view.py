@@ -41,7 +41,9 @@ class NeuXtalVizWidget(QWidget):
         self.proj_box.clicked.connect(self.change_projection)
 
         self.reset_button = QPushButton("Reset View", self)
-        self.reset_button.setToolTip("Reset the view to the default orientation.")
+        self.reset_button.setToolTip(
+            "Reset the view to the default orientation."
+        )
         self.reset_button.clicked.connect(self.reset_view)
 
         self.camera_button = QPushButton("Reset Camera", self)
@@ -54,11 +56,15 @@ class NeuXtalVizWidget(QWidget):
 
         self.axes_box = QCheckBox("Show Axes", self)
         self.axes_box.setChecked(True)
-        self.axes_box.setToolTip("Show or hide the coordinate axes in the plot.")
+        self.axes_box.setToolTip(
+            "Show or hide the coordinate axes in the plot."
+        )
         self.axes_box.clicked.connect(self.show_axes)
 
         self.save_button = QPushButton("Save Screenshot", self)
-        self.save_button.setToolTip("Save a screenshot of the current 3D view.")
+        self.save_button.setToolTip(
+            "Save a screenshot of the current 3D view."
+        )
 
         self.frame = QFrame()
 
@@ -139,9 +145,15 @@ class NeuXtalVizWidget(QWidget):
         self.axis1_line.setValidator(validator)
         self.axis2_line.setValidator(validator)
         self.axis3_line.setValidator(validator)
-        self.axis1_line.setToolTip("First component of the view direction (e.g., h or u)")
-        self.axis2_line.setToolTip("Second component of the view direction (e.g., k or v)")
-        self.axis3_line.setToolTip("Third component of the view direction (e.g., l or w)")
+        self.axis1_line.setToolTip(
+            "First component of the view direction (e.g., h or u)"
+        )
+        self.axis2_line.setToolTip(
+            "Second component of the view direction (e.g., k or v)"
+        )
+        self.axis3_line.setToolTip(
+            "Third component of the view direction (e.g., l or w)"
+        )
 
         self.axis1_label = QLabel("h", self)
         self.axis2_label = QLabel("k", self)
@@ -154,18 +166,28 @@ class NeuXtalVizWidget(QWidget):
         self.axisup1_line.setValidator(validator)
         self.axisup2_line.setValidator(validator)
         self.axisup3_line.setValidator(validator)
-        self.axisup1_line.setToolTip("First component of the up direction (e.g., h or u)")
-        self.axisup2_line.setToolTip("Second component of the up direction (e.g., k or v)")
-        self.axisup3_line.setToolTip("Third component of the up direction (e.g., l or w)")
+        self.axisup1_line.setToolTip(
+            "First component of the up direction (e.g., h or u)"
+        )
+        self.axisup2_line.setToolTip(
+            "Second component of the up direction (e.g., k or v)"
+        )
+        self.axisup3_line.setToolTip(
+            "Third component of the up direction (e.g., l or w)"
+        )
 
         self.axisup1_label = QLabel("h", self)
         self.axisup2_label = QLabel("k", self)
         self.axisup3_label = QLabel("l", self)
 
         self.manual_button = QPushButton("View Axis", self)
-        self.manual_button.setToolTip("Set the view direction using the specified axis components.")
+        self.manual_button.setToolTip(
+            "Set the view direction using the specified axis components."
+        )
         self.manualup_button = QPushButton("View Up Axis", self)
-        self.manualup_button.setToolTip("Set the up direction using the specified axis components.")
+        self.manualup_button.setToolTip(
+            "Set the up direction using the specified axis components."
+        )
 
         self.px_button = QPushButton("+Qx", self)
         self.px_button.setToolTip("View along the +Qx direction.")
@@ -182,11 +204,17 @@ class NeuXtalVizWidget(QWidget):
         self.mz_button.setToolTip("View along the -Qz direction.")
 
         self.a_star_button = QPushButton("a*", self)
-        self.a_star_button.setToolTip("Align view along the a* reciprocal axis.")
+        self.a_star_button.setToolTip(
+            "Align view along the a* reciprocal axis."
+        )
         self.b_star_button = QPushButton("b*", self)
-        self.b_star_button.setToolTip("Align view along the b* reciprocal axis.")
+        self.b_star_button.setToolTip(
+            "Align view along the b* reciprocal axis."
+        )
         self.c_star_button = QPushButton("c*", self)
-        self.c_star_button.setToolTip("Align view along the c* reciprocal axis.")
+        self.c_star_button.setToolTip(
+            "Align view along the c* reciprocal axis."
+        )
 
         self.a_button = QPushButton("a", self)
         self.a_button.setToolTip("Align view along the a real axis.")
