@@ -16,6 +16,11 @@ jobs:
         environment-file: environment.yml
         activate-environment: nxv
 
+    - name: Install package in editable mode
+      shell: bash -l {0}  # activate conda environment
+      run: |
+        python -m pip install -e .
+  
     - name: Run tests with pytest
       shell: bash -l {0}  # ensures conda environment is active
       run: |
