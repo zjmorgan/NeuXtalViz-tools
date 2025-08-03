@@ -13,7 +13,7 @@ dependencies:
   - pyvistaqt
   - vtk
   - pytest
-  - mantidworkbench
+  - mantid
   - scikit-learn
   - scikit-image
   - astropy
