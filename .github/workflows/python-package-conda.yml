@@ -10,18 +10,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v3
+
+    - name: Set up Miniforge
+      uses: conda-incubator/setup-miniforge@v2
       with:
-        python-version: '3.11'
-    - name: Add conda to system path
-      run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
+        python-version: 3.11
+        miniforge-variant: Miniforge
+        use-mamba: true   # Optional: for faster environment solving
+
     - name: Install dependencies
       run: |
-        conda env update --file environment.yml --name base
-    - name: Test with pytest
+        mamba env update --file environment.yml --name base
+
+    - name: Run tests with pytest
       run: |
-        conda install pytest
+        mamba install pytest
         pytest
