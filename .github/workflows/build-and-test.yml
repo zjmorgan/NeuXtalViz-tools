@@ -17,12 +17,12 @@ jobs:
         python-version: [3.11]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Miniforge
-        uses: conda-incubator/setup-miniforge@v1
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          miniforge-variant: Miniforge
+          miniforge-version: latest
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yml
           activate-environment: nxv
