@@ -5,22 +5,18 @@ on: [push]
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Miniconda
+    - name: Set up Miniconda with nxv environment
       uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: 3.11
-        activate-environment: base
-
-    - name: Install dependencies
-      run: |
-        conda env update --file environment.yml --name base
+        environment-file: environment.yml
+        activate-environment: nxv
 
     - name: Run tests with pytest
+      shell: bash -l {0}  # ensures conda environment is active
       run: |
         pytest
