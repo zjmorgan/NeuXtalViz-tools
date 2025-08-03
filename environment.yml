@@ -1,0 +1,24 @@
+name: nxv
+channels:
+  - conda-forge
+  - mantid/label/nightly
+dependencies:
+  - python
+  - numpy
+  - scipy
+  - matplotlib
+  - pycifrw
+  - h5py
+  - pyvista>=0.34.2
+  - pyvistaqt
+  - pytest
+  - mantidworkbench
+  - scikit-learn
+  - scikit-image
+  - astropy
+  - dill
+  - psutil
+  - multiprocess
+  - black
+  - pip:
+    - pyqtdarktheme
