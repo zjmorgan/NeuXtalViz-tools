@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - mantid/label/nightly
 dependencies:
-  - python
+  - python>=3.11
   - numpy
   - scipy
   - matplotlib
@@ -11,6 +11,7 @@ dependencies:
   - h5py
   - pyvista>=0.45.2
   - pyvistaqt
+  - vtk
   - pytest
   - mantidworkbench
   - scikit-learn
