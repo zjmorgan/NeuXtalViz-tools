@@ -9,7 +9,7 @@ dependencies:
   - matplotlib
   - pycifrw
   - h5py
-  - pyvista>=0.34.2
+  - pyvista>=0.45.2
   - pyvistaqt
   - pytest
   - mantidworkbench
