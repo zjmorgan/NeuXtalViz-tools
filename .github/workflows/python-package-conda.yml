@@ -11,18 +11,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Miniforge
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        python-version: 3.11
-        miniforge-variant: Miniforge
-        use-mamba: true   # Optional: for faster environment solving
+    - name: Set up Pixi
+      uses: prefix-dev/setup-pixi@v0.5.1
 
     - name: Install dependencies
       run: |
-        mamba env update --file environment.yml --name base
+        pixi install
 
     - name: Run tests with pytest
       run: |
-        mamba install pytest
-        pytest
+        pixi run pytest
