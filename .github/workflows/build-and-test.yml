@@ -24,13 +24,8 @@ jobs:
         with:
           miniforge-variant: Miniforge
           python-version: ${{ matrix.python-version }}
+          environment-file: environment.yml
+          activate-environment: nxv
 
-      - name: Create environment from environment.yml
-        run: |
-          conda env create -f environment.yml
-
-      - name: Activate environment and run tests
-        run: |
-          source $(conda info --base)/etc/profile.d/conda.sh
-          conda activate nxv
-          pytest tests/
+      - name: Run tests
+        run: pytest tests/
