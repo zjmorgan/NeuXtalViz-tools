@@ -808,6 +808,8 @@ class UBView(NeuXtalVizWidget):
         self.form_line.setReadOnly(True)
         self.form_line.setToolTip("Form number of the selected cell.")
 
+        form_label = QLabel("Form:")
+
         min_const_label = QLabel("Min(a,b,c) [Å]:")
         max_const_label = QLabel("Max(a,b,c) [Å]:")
 
