@@ -36,6 +36,14 @@ from NeuXtalViz.views.base_view import NeuXtalVizWidget
 
 
 class ExperimentView(NeuXtalVizWidget):
+    """
+    View for experiment planning and peak visualization in NeuXtalViz.
+
+    Provides user interface elements for experiment setup, coverage
+    analysis, peak calculation, and plan management. Tool tips are added
+    to all major widgets and controls to improve usability.
+    """
+
     roi_ready = Signal()
     viz_ready = Signal()
 
@@ -43,6 +51,7 @@ class ExperimentView(NeuXtalVizWidget):
         super().__init__(parent)
 
         self.tab_widget = QTabWidget(self)
+        self.tab_widget.setToolTip("Switch between coverage and peak tabs.")
 
         self.coverage_tab()
         self.peak_tab()
@@ -62,12 +71,27 @@ class ExperimentView(NeuXtalVizWidget):
         self.instrument_combo.addItem("SNAP")
         self.instrument_combo.addItem("WAND²")
         self.instrument_combo.addItem("DEMAND")
+        self.instrument_combo.setToolTip(
+            "Select the instrument for the experiment."
+        )
 
         self.mode_combo = QComboBox(self)
+        self.mode_combo.setToolTip(
+            "Select the goniometer mode for the experiment."
+        )
 
         self.crystal_combo = QComboBox(self)
+        self.crystal_combo.setToolTip(
+            "Select the crystal system for the sample."
+        )
         self.point_group_combo = QComboBox(self)
+        self.point_group_combo.setToolTip(
+            "Select the point group for the sample."
+        )
         self.lattice_centering_combo = QComboBox(self)
+        self.lattice_centering_combo.setToolTip(
+            "Select the lattice centering for the sample."
+        )
 
         self.crystal_combo.addItem("Triclinic")
         self.crystal_combo.addItem("Monoclinic")
@@ -79,14 +103,36 @@ class ExperimentView(NeuXtalVizWidget):
         self.crystal_combo.addItem("Cubic")
 
         self.load_UB_button = QPushButton("Load UB", self)
+        self.load_UB_button.setToolTip(
+            "Load a UB matrix from a file for orientation."
+        )
         self.optimize_button = QPushButton("Optimize Coverage", self)
+        self.optimize_button.setToolTip(
+            "Optimize the coverage of the experiment plan."
+        )
         self.delete_button = QPushButton("Delete Highlighted", self)
+        self.delete_button.setToolTip(
+            "Delete the selected orientations from the plan."
+        )
         self.highlight_button = QPushButton("Highlight All", self)
+        self.highlight_button.setToolTip(
+            "Highlight all orientations in the plan table."
+        )
 
         self.count_combo = QComboBox(self)
+        self.count_combo.setToolTip(
+            "Select the counting method for the experiment."
+        )
         self.update_button = QPushButton("Update Highlighted", self)
+        self.update_button.setToolTip(
+            "Update the selected orientations with the current settings."
+        )
         self.count_line = QLineEdit("1.0")
+        self.count_line.setToolTip(
+            "Set the counting value for the experiment (e.g., time or monitor)."
+        )
         self.title_line = QLineEdit("Scan Title")
+        self.title_line.setToolTip("Set the title for the scan or experiment.")
 
         notation = QDoubleValidator.StandardNotation
         validator = QDoubleValidator(0.001, 10000, 5, notation=notation)
@@ -94,13 +140,31 @@ class ExperimentView(NeuXtalVizWidget):
         self.count_line.setValidator(validator)
 
         self.save_plan_button = QPushButton("Save CSV", self)
+        self.save_plan_button.setToolTip(
+            "Save the current experiment plan as a CSV file."
+        )
         self.save_experiment_button = QPushButton("Save Experiment", self)
+        self.save_experiment_button.setToolTip(
+            "Save the current experiment as a NeXus file."
+        )
         self.load_experiment_button = QPushButton("Load Experiment", self)
+        self.load_experiment_button.setToolTip(
+            "Load an experiment from a NeXus file."
+        )
 
         self.wl_min_line = QLineEdit("0.4")
+        self.wl_min_line.setToolTip(
+            "Set the minimum wavelength (λ) in Ångströms."
+        )
         self.wl_max_line = QLineEdit("3.5")
+        self.wl_max_line.setToolTip(
+            "Set the maximum wavelength (λ) in Ångströms."
+        )
 
         self.d_min_line = QLineEdit("0.7")
+        self.d_min_line.setToolTip(
+            "Set the minimum d-spacing (d(min)) in Ångströms."
+        )
 
         wl_label = QLabel("λ:")
         d_min_label = QLabel("d(min):")
@@ -120,6 +184,9 @@ class ExperimentView(NeuXtalVizWidget):
 
         settings_label = QLabel("Settings")
         self.settings_line = QLineEdit("20")
+        self.settings_line.setToolTip(
+            "Set the number of settings for the experiment plan."
+        )
 
         validator = QIntValidator(1, 1000)
 
@@ -128,6 +195,9 @@ class ExperimentView(NeuXtalVizWidget):
         resize = QHeaderView.Stretch
 
         self.goniometer_table = QTableWidget()
+        self.goniometer_table.setToolTip(
+            "Table of goniometer angles and their limits."
+        )
 
         self.goniometer_table.setRowCount(0)
         self.goniometer_table.setColumnCount(3)
@@ -139,11 +209,15 @@ class ExperimentView(NeuXtalVizWidget):
         self.goniometer_table.setHorizontalHeaderLabels(labels)
 
         self.motor_table = QTableWidget()
+        self.motor_table.setToolTip("Table of calibration and motor values.")
 
         self.motor_table.setRowCount(0)
         self.motor_table.setColumnCount(2)
 
         self.plan_table = QTableWidget()
+        self.plan_table.setToolTip(
+            "Table of planned orientations and settings."
+        )
 
         labels = ["Motor", "Value"]
 
@@ -152,6 +226,7 @@ class ExperimentView(NeuXtalVizWidget):
         self.motor_table.setHorizontalHeaderLabels(labels)
 
         self.mesh_table = QTableWidget()
+        self.mesh_table.setToolTip("Table for mesh scan angles and limits.")
 
         self.mesh_table.setRowCount(0)
         self.mesh_table.setColumnCount(4)
@@ -163,6 +238,7 @@ class ExperimentView(NeuXtalVizWidget):
         self.mesh_table.setHorizontalHeaderLabels(labels)
 
         self.mesh_button = QPushButton("Add Mesh", self)
+        self.mesh_button.setToolTip("Add a mesh scan to the experiment plan.")
 
         settings_layout = QHBoxLayout()
 
@@ -222,10 +298,17 @@ class ExperimentView(NeuXtalVizWidget):
         cal_layout = QGridLayout()
 
         self.cal_line = QLineEdit("")
+        self.cal_line.setToolTip("Path to detector calibration file.")
+
         self.mask_line = QLineEdit("")
+        self.mask_line.setToolTip("Path to detector mask file.")
 
         self.cal_browse_button = QPushButton("Detector", self)
+        self.cal_browse_button.setToolTip(
+            "Browse for detector calibration file."
+        )
         self.mask_browse_button = QPushButton("Mask", self)
+        self.mask_browse_button.setToolTip("Browse for detector mask file.")
 
         cal_layout.addWidget(self.cal_line, 0, 0)
         cal_layout.addWidget(self.cal_browse_button, 0, 1)
@@ -283,23 +366,34 @@ class ExperimentView(NeuXtalVizWidget):
         calculator_layout = QGridLayout()
 
         h_label = QLabel("h", self)
+        h_label.setToolTip("Miller index h for the peak.")
         k_label = QLabel("k", self)
+        k_label.setToolTip("Miller index k for the peak.")
         l_label = QLabel("l", self)
+        l_label.setToolTip("Miller index l for the peak.")
 
         peak_1_label = QLabel("1:", self)
+        peak_1_label.setToolTip("First peak indices.")
         peak_2_label = QLabel("2:", self)
+        peak_2_label.setToolTip("Second peak indices.")
 
         notation = QDoubleValidator.StandardNotation
 
         validator = QDoubleValidator(-100, 100, 5, notation=notation)
 
         self.h1_line = QLineEdit()
+        self.h1_line.setToolTip("Enter the h index for the first peak.")
         self.k1_line = QLineEdit()
+        self.k1_line.setToolTip("Enter the k index for the first peak.")
         self.l1_line = QLineEdit()
+        self.l1_line.setToolTip("Enter the l index for the first peak.")
 
         self.h2_line = QLineEdit()
+        self.h2_line.setToolTip("Enter the h index for the second peak.")
         self.k2_line = QLineEdit()
+        self.k2_line.setToolTip("Enter the k index for the second peak.")
         self.l2_line = QLineEdit()
+        self.l2_line.setToolTip("Enter the l index for the second peak.")
 
         self.h1_line.setValidator(validator)
         self.k1_line.setValidator(validator)
@@ -310,31 +404,62 @@ class ExperimentView(NeuXtalVizWidget):
         self.l2_line.setValidator(validator)
 
         gamma_label = QLabel("γ [°]", self)
+        gamma_label.setToolTip("Gamma angle (horizontal) in degrees.")
         nu_label = QLabel("ν [°]", self)
+        nu_label.setToolTip("Nu angle (vertical) in degrees.")
         intersect_label = QLabel("λ [Å]", self)
+        intersect_label.setToolTip("Wavelength at intersection in Ångström.")
 
         self.horizontal_line = QLineEdit()
+        self.horizontal_line.setToolTip(
+            "Horizontal angle (γ) for the selected peak."
+        )
         self.vertical_line = QLineEdit()
+        self.vertical_line.setToolTip(
+            "Vertical angle (ν) for the selected peak."
+        )
         self.intersect_line = QLineEdit()
+        self.intersect_line.setToolTip("Wavelength (λ) for the selected peak.")
 
         self.horizontal_line.setReadOnly(True)
         self.vertical_line.setReadOnly(True)
         self.intersect_line.setReadOnly(True)
 
         self.horizontal_alt_line = QLineEdit()
+        self.horizontal_alt_line.setToolTip(
+            "Horizontal angle (γ) for the alternate peak."
+        )
         self.vertical_alt_line = QLineEdit()
+        self.vertical_alt_line.setToolTip(
+            "Vertical angle (ν) for the alternate peak."
+        )
         self.intersect_alt_line = QLineEdit()
+        self.intersect_alt_line.setToolTip(
+            "Wavelength (λ) for the alternate peak."
+        )
 
         self.horizontal_alt_line.setReadOnly(True)
         self.vertical_alt_line.setReadOnly(True)
         self.intersect_alt_line.setReadOnly(True)
 
         self.calculate_single_button = QPushButton("Individual Peak", self)
+        self.calculate_single_button.setToolTip(
+            "Calculate instrument angles for the first peak."
+        )
         self.calculate_double_button = QPushButton("Simultaneous Peaks", self)
+        self.calculate_double_button.setToolTip(
+            "Calculate instrument angles for both peaks simultaneously."
+        )
 
         self.calculate_single_alt_button = QPushButton("Individual Peak", self)
+        self.calculate_single_alt_button.setToolTip(
+            "Calculate instrument angles for the second peak."
+        )
 
         self.equivalents_box = QCheckBox("Allow Equivalents", self)
+        self.equivalents_box.setToolTip(
+            "Allow equivalent reflections in the calculation."
+        )
         self.equivalents_box.setChecked(False)
 
         calculator_layout.addWidget(h_label, 0, 1, Qt.AlignCenter)
@@ -386,13 +511,16 @@ class ExperimentView(NeuXtalVizWidget):
         orientation_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Add Orientation", self)
+        self.add_button.setToolTip("Add the current orientation to the plan.")
 
         self.angles_line = QLineEdit()
-
+        self.angles_line.setToolTip(
+            "Display the angles for the selected orientation."
+        )
         self.angles_line.setReadOnly(True)
 
         self.angles_combo = QComboBox(self)
-
+        self.angles_combo.setToolTip("Select an orientation from the list.")
         orientation_layout.addWidget(self.angles_combo)
         orientation_layout.addWidget(self.angles_line)
         orientation_layout.addWidget(self.add_button)
@@ -402,6 +530,9 @@ class ExperimentView(NeuXtalVizWidget):
         stretch = QHeaderView.Stretch
 
         self.peaks_table = QTableWidget()
+        self.peaks_table.setToolTip(
+            "Table of calculated peaks and their properties."
+        )
         self.peaks_table.setRowCount(0)
         self.peaks_table.setColumnCount(5)
 

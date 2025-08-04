@@ -50,6 +50,14 @@ cmaps = {
 
 
 class UBView(NeuXtalVizWidget):
+    """
+    View for UB matrix and peak indexing tools in NeuXtalViz.
+
+    Provides user interface elements for UB calculation, peak finding,
+    indexing, prediction, integration, and filtering. Tool tips are added
+    to all major widgets and controls for improved usability.
+    """
+
     roi_ready = Signal()
     scan_ready = Signal()
     index_ready = Signal()
@@ -58,6 +66,7 @@ class UBView(NeuXtalVizWidget):
         super().__init__(parent)
 
         self.tab_widget = QTabWidget(self)
+        self.tab_widget.setToolTip("Switch between UB, peaks, and views tabs.")
 
         self.parameters_tab()
         self.table_tab()
@@ -67,7 +76,6 @@ class UBView(NeuXtalVizWidget):
         self.layout().addWidget(self.tab_widget, stretch=1)
 
         self.last_highlight = None
-
         self.x_min, self.x_max = None, None
         self.y_min, self.y_max = None, None
 
