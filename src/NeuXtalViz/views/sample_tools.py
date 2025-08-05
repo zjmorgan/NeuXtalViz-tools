@@ -27,6 +27,13 @@ from NeuXtalViz.views.base_view import NeuXtalVizWidget
 
 
 class SampleView(NeuXtalVizWidget):
+    """
+    View for managing and visualizing sample tools in NeuXtalViz.
+
+    Provides user interface elements for sample selection, loading,
+    and manipulation.
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -310,6 +317,68 @@ class SampleView(NeuXtalVizWidget):
         sample_layout.addLayout(cryst_layout)
 
         samp_tab.setLayout(sample_layout)
+
+        # Set tool tips for user-friendly guidance
+        self.sample_combo.setToolTip(
+            "Select a sample shape from the dropdown menu."
+        )
+        self.add_sample_button.setToolTip(
+            "Add the defined sample to the visualization."
+        )
+        self.load_UB_button.setToolTip(
+            "Load a UB matrix from a file to define the sample orientation."
+        )
+        self.param1_line.setToolTip("Set the width of the sample (in cm).")
+        self.param2_line.setToolTip("Set the height of the sample (in cm).")
+        self.param3_line.setToolTip("Set the thickness of the sample (in cm).")
+        self.chem_line.setToolTip(
+            "Enter the chemical formula of the material."
+        )
+        self.Z_line.setToolTip("Set the atomic number (Z) of the material.")
+        self.V_line.setToolTip("Set the volume per unit cell (in Å^3).")
+        self.sigma_a_line.setToolTip(
+            "Set the absorption cross-section (σ_a) for scattering."
+        )
+        self.sigma_s_line.setToolTip(
+            "Set the scattering cross-section (σ_s) for scattering."
+        )
+        self.mu_a_line.setToolTip(
+            "Set the linear absorption coefficient (μ_a) for absorption."
+        )
+        self.mu_s_line.setToolTip(
+            "Set the linear scattering coefficient (μ_s) for absorption."
+        )
+        self.N_line.setToolTip("Set the number of atoms in the unit cell.")
+        self.M_line.setToolTip(
+            "Set the molar mass of the material (in g/mol)."
+        )
+        self.n_line.setToolTip(
+            "Set the electron density (n) of the material (in 1/Å^3)."
+        )
+        self.rho_line.setToolTip(
+            "Set the density of the material (in g/cm^3)."
+        )
+        self.v_line.setToolTip("Set the volume of the unit cell (in cm^3).")
+        self.m_line.setToolTip("Set the mass of the unit cell (in g).")
+        self.hu_line.setToolTip("Set the h-index for the face indexing.")
+        self.ku_line.setToolTip("Set the k-index for the face indexing.")
+        self.lu_line.setToolTip("Set the l-index for the face indexing.")
+        self.hv_line.setToolTip("Set the h-index for the face indexing.")
+        self.kv_line.setToolTip("Set the k-index for the face indexing.")
+        self.lv_line.setToolTip("Set the l-index for the face indexing.")
+        self.gon_table.setToolTip(
+            "Table displaying the goniometer angles and settings."
+        )
+        self.name_line.setToolTip("Name of the goniometer setting.")
+        self.x_line.setToolTip("Set the x-component of the goniometer angle.")
+        self.y_line.setToolTip("Set the y-component of the goniometer angle.")
+        self.z_line.setToolTip("Set the z-component of the goniometer angle.")
+        self.sense_line.setToolTip(
+            "Set the sense of rotation for the goniometer."
+        )
+        self.angle_line.setToolTip(
+            "Set the angle of rotation for the goniometer (in degrees)."
+        )
 
     def connect_sample_parameters(self, update_parameters):
         self.sample_combo.activated.connect(update_parameters)

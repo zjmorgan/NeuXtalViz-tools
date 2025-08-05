@@ -21,6 +21,13 @@ qdarktheme.enable_hi_dpi()
 
 
 class CommandBrowser(QMainWindow):
+    """
+    View for browsing and executing commands in NeuXtalViz.
+
+    Provides user interface elements for searching, selecting, and
+    running available commands, as well as viewing command details.
+    """
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Command Browser")
@@ -72,6 +79,21 @@ class CommandBrowser(QMainWindow):
         shelxt_action.triggered.connect(self.switch_shelxt)
         discus_action = command_menu.addAction("discus")
         discus_action.triggered.connect(self.switch_discus)
+
+        # Set tool tips for user-friendly guidance
+        self.file_list.setToolTip(
+            "List of files in the selected directory. Click to edit."
+        )
+        self.text_editor.setToolTip(
+            "Edit the content of the selected file here."
+        )
+        save_button.setToolTip("Save the changes made to the current file.")
+        self.run_button.setToolTip(
+            "Run the selected command on the current file."
+        )
+        self.file_label.setToolTip(
+            "Shows the name of the file currently being edited."
+        )
 
     def switch_command(self, command):
         self.command = command

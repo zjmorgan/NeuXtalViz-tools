@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 
 from qtpy.QtWidgets import (
@@ -17,7 +16,7 @@ from qtpy.QtWidgets import (
     QFileDialog,
 )
 
-from qtpy.QtGui import QDoubleValidator, QIntValidator
+from qtpy.QtGui import QDoubleValidator
 
 import pyvista as pv
 
@@ -29,6 +28,14 @@ from NeuXtalViz.views.base_view import NeuXtalVizWidget
 
 
 class CrystalStructureView(NeuXtalVizWidget):
+    """
+    View for visualizing and editing crystal structures in NeuXtalViz.
+
+    Provides user interface elements for entering lattice parameters,
+    selecting crystal system and space group, loading/saving structure
+    files, and visualizing atomic positions and structure factors.
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -199,6 +206,51 @@ class CrystalStructureView(NeuXtalVizWidget):
 
         struct_tab.setLayout(structure_layout)
 
+        self.a_line.setToolTip(
+            "Lattice parameter a (Å). Enter a positive real value."
+        )
+        self.b_line.setToolTip(
+            "Lattice parameter b (Å). Enter a positive real value."
+        )
+        self.c_line.setToolTip(
+            "Lattice parameter c (Å). Enter a positive real value."
+        )
+        self.alpha_line.setToolTip(
+            "Lattice angle α (degrees). Enter a value between 10 and 170."
+        )
+        self.beta_line.setToolTip(
+            "Lattice angle β (degrees). Enter a value between 10 and 170."
+        )
+        self.gamma_line.setToolTip(
+            "Lattice angle γ (degrees). Enter a value between 10 and 170."
+        )
+        self.crystal_system_combo.setToolTip("Select the crystal system.")
+        self.space_group_combo.setToolTip("Select the space group.")
+        self.setting_combo.setToolTip("Select the space group setting.")
+        self.load_CIF_button.setToolTip(
+            "Load a crystal structure from a CIF file."
+        )
+        self.save_INS_button.setToolTip(
+            "Save the current structure as an INS file."
+        )
+        self.atm_table.setToolTip("Table of atomic positions and parameters.")
+        self.x_line.setToolTip(
+            "Fractional x coordinate for the selected atom."
+        )
+        self.y_line.setToolTip(
+            "Fractional y coordinate for the selected atom."
+        )
+        self.z_line.setToolTip(
+            "Fractional z coordinate for the selected atom."
+        )
+        self.occ_line.setToolTip("Occupancy for the selected atom (0 to 1).")
+        self.Uiso_line.setToolTip(
+            "Isotropic displacement parameter U (0 to 100)."
+        )
+        self.chem_line.setToolTip("Chemical formula of the unit cell.")
+        self.Z_line.setToolTip("Number of formula units per unit cell (Z).")
+        self.V_line.setToolTip("Unit cell volume (Å³).")
+
     def factors_tab(self):
         fact_tab = QWidget()
         self.tab_widget.addTab(fact_tab, "Factors")
@@ -266,6 +318,26 @@ class CrystalStructureView(NeuXtalVizWidget):
         factors_layout.addLayout(indivdual_layout)
 
         fact_tab.setLayout(factors_layout)
+
+        self.dmin_line.setToolTip(
+            "Minimum d-spacing (Å) for structure factor calculation."
+        )
+        self.calculate_button.setToolTip(
+            "Calculate structure factors for all reflections."
+        )
+        self.f2_table.setToolTip("Table of calculated structure factors (F²).")
+        self.h_line.setToolTip(
+            "h index for individual structure factor calculation."
+        )
+        self.k_line.setToolTip(
+            "k index for individual structure factor calculation."
+        )
+        self.l_line.setToolTip(
+            "l index for individual structure factor calculation."
+        )
+        self.individual_button.setToolTip(
+            "Calculate structure factor for the specified hkl."
+        )
 
     def connect_save_INS(self, save_INS):
         self.save_INS_button.clicked.connect(save_INS)

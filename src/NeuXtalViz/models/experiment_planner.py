@@ -50,68 +50,6 @@ from scipy.spatial.transform import Rotation
 from NeuXtalViz.models.base_model import NeuXtalVizModel
 from NeuXtalViz.config.instruments import beamlines
 
-# lattice_centering_dict = {
-#     'P': 'Primitive',
-#     'C': 'C-face centred',
-#     'A': 'A-face centred',
-#     'B': 'B-face centred',
-#     'I': 'Body centred',
-#     'F': 'All-face centred',
-#     'R': 'Primitive',
-#     'Robv': 'Rhombohedrally centred, obverse',
-#     'Rrev': 'Rhombohedrally centred, reverse',
-# }
-
-# point_group_dict = {
-#     '1': '1 (Triclinic)',
-#     '-1': '-1 (Triclinic)',
-#     '2': '2 (Monoclinic, unique axis b)',
-#     'm': 'm (Monoclinic, unique axis b)',
-#     '2/m': '2/m (Monoclinic, unique axis b)',
-#     '112': '112 (Monoclinic, unique axis c)',
-#     '11m': '11m (Monoclinic, unique axis c)',
-#     '112/m': '112/m (Monoclinic, unique axis c)',
-#     '222': '222 (Orthorhombic)',
-#     'mm2': 'mm2 (Orthorhombic)',
-#     'mmm': 'mmm (Orthorhombic)',
-#     '4': '4 (Tetragonal)',
-#     '-4': '-4 (Tetragonal)',
-#     '4/m': '4/m (Tetragonal)',
-#     '422': '422 (Tetragonal)',
-#     '4mm': '4mm (Tetragonal)',
-#     '-42m': '-42m (Tetragonal)',
-#     '-4m2': '-4m2 (Tetragonal)',
-#     '4/mmm': '4/mmm (Tetragonal)',
-#     '3 r': '3 r (Trigonal - Rhombohedral)',
-#     '-3 r': '-3 r (Trigonal - Rhombohedral)',
-#     '32 r': '32 r (Trigonal - Rhombohedral)',
-#     '3m r': '3m r (Trigonal - Rhombohedral)',
-#     '-3m r': '-3m r (Trigonal - Rhombohedral)',
-#     '3': '3 (Trigonal - Hexagonal)',
-#     '-3': '-3 (Trigonal - Hexagonal)',
-#     '312': '312 (Trigonal - Hexagonal)',
-#     '31m': '31m (Trigonal - Hexagonal)',
-#     '32': '32 (Trigonal - Hexagonal)',
-#     '321': '321 (Trigonal - Hexagonal)',
-#     '3m': '3m (Trigonal - Hexagonal)',
-#     '-31m': '-31m (Trigonal - Hexagonal)',
-#     '-3m': '-3m (Trigonal - Hexagonal)',
-#     '-3m1': '-3m1 (Trigonal - Hexagonal)',
-#     '6': '6 (Hexagonal)',
-#     '-6': '-6 (Hexagonal)',
-#     '6/m': '6/m (Hexagonal)',
-#     '622': '622 (Hexagonal)',
-#     '6mm': '6mm (Hexagonal)',
-#     '-62m': '-62m (Hexagonal)',
-#     '-6m2': '-6m2 (Hexagonal)',
-#     '6/mmm': '6/mmm (Hexagonal)',
-#     '23': '23 (Cubic)',
-#     'm-3': 'm-3 (Cubic)',
-#     '432': '432 (Cubic)',
-#     '-43m': '-43m (Cubic)',
-#     'm-3m': 'm-3m (Cubic)',
-# }
-
 point_group_centering = {
     "1": ["P"],
     "-1": ["P"],
@@ -198,6 +136,15 @@ centering_conditions = {
 
 
 class ExperimentModel(NeuXtalVizModel):
+    """
+    Model for managing experiment planning, instrument setup, and
+    crystallographic calculations in NeuXtalViz.
+
+    This class provides methods for initializing instruments, handling
+    calibration and mask files, managing sample and plan workspaces,
+    performing peak prediction, and calculating experiment statistics.
+    """
+
     def __init__(self):
         super(ExperimentModel, self).__init__()
 
@@ -1356,6 +1303,14 @@ class ExperimentModel(NeuXtalVizModel):
 
 
 class CrystalPlan:
+    """
+    Genetic algorithm-based class for optimizing experiment plans in
+    NeuXtalViz.
+
+    This class generates, recombines, and evaluates sets of orientations
+    and settings to maximize experiment coverage and completeness.
+    """
+
     def __init__(
         self,
         use,

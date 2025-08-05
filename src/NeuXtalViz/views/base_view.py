@@ -32,6 +32,11 @@ from NeuXtalViz.views.utilities import Worker, ThreadPool
 
 
 class NeuXtalVizWidget(QWidget):
+    """
+    Base widget for all NeuXtalViz views, providing shared functionality
+    and interface for user-facing widgets.
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
 

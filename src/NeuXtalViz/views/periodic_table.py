@@ -31,6 +31,14 @@ colors = {
 
 
 class PeriodicTableView(QWidget):
+    """
+    View for displaying and selecting elements from the periodic table in
+    NeuXtalViz.
+
+    Provides a user interface for element selection, highlighting, and
+    displaying element properties.
+    """
+
     selection = pyqtSignal(str)
 
     def __init__(self, parent=None):

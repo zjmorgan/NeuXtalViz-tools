@@ -40,8 +40,7 @@ class ExperimentView(NeuXtalVizWidget):
     View for experiment planning and peak visualization in NeuXtalViz.
 
     Provides user interface elements for experiment setup, coverage
-    analysis, peak calculation, and plan management. Tool tips are added
-    to all major widgets and controls to improve usability.
+    analysis, peak calculation, and plan management.
     """
 
     roi_ready = Signal()
