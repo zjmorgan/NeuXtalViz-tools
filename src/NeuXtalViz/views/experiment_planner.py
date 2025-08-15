@@ -299,6 +299,9 @@ class ExperimentView(NeuXtalVizWidget):
         self.cal_line = QLineEdit("")
         self.cal_line.setToolTip("Path to detector calibration file.")
 
+        self.gon_line = QLineEdit("")
+        self.gon_line.setToolTip("Path to goniometer calibration file.")
+
         self.mask_line = QLineEdit("")
         self.mask_line.setToolTip("Path to detector mask file.")
 
@@ -306,14 +309,21 @@ class ExperimentView(NeuXtalVizWidget):
         self.cal_browse_button.setToolTip(
             "Browse for detector calibration file."
         )
+        self.gon_browse_button = QPushButton("Goniometer", self)
+        self.gon_browse_button.setToolTip(
+            "Browse for goniometer calibration file."
+        )
         self.mask_browse_button = QPushButton("Mask", self)
         self.mask_browse_button.setToolTip("Browse for detector mask file.")
 
         cal_layout.addWidget(self.cal_line, 0, 0)
         cal_layout.addWidget(self.cal_browse_button, 0, 1)
 
-        cal_layout.addWidget(self.mask_line, 1, 0)
-        cal_layout.addWidget(self.mask_browse_button, 1, 1)
+        cal_layout.addWidget(self.gon_line, 1, 0)
+        cal_layout.addWidget(self.gon_browse_button, 1, 1)
+
+        cal_layout.addWidget(self.mask_line, 2, 0)
+        cal_layout.addWidget(self.mask_browse_button, 2, 1)
 
         motor_layout.addLayout(cal_layout)
         motor_layout.addWidget(self.motor_table)
@@ -613,11 +623,20 @@ class ExperimentView(NeuXtalVizWidget):
     def connect_load_detector(self, load_detector_cal):
         self.cal_browse_button.clicked.connect(load_detector_cal)
 
+    def connect_load_goniometer(self, load_goniometer_cal):
+        self.gon_browse_button.clicked.connect(load_goniometer_cal)
+
     def get_detector_calibration(self):
         return self.cal_line.text()
 
     def set_detector_calibration(self, filename):
         return self.cal_line.setText(filename)
+
+    def get_goniometer_calibration(self):
+        return self.gon_line.text()
+
+    def set_goniometer_calibration(self, filename):
+        return self.gon_line.setText(filename)
 
     def get_mask(self):
         return self.mask_line.text()
@@ -633,6 +652,21 @@ class ExperimentView(NeuXtalVizWidget):
         file_dialog.setFileMode(QFileDialog.AnyFile)
 
         file_filters = "Calibration files (*.DetCal *.detcal *.xml)"
+
+        filename, _ = file_dialog.getOpenFileName(
+            self, "Load calibration file", path, file_filters, options=options
+        )
+
+        return filename
+
+    def load_goniometer_cal_dialog(self, path=""):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.AnyFile)
+
+        file_filters = "Goniometer calibration files (*.xml)"
 
         filename, _ = file_dialog.getOpenFileName(
             self, "Load calibration file", path, file_filters, options=options

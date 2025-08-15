@@ -66,6 +66,7 @@ from mantid.simpleapi import (
     LoadNexus,
     LoadIsawDetCal,
     LoadParameterFile,
+    LoadEmptyInstrument,
     ApplyCalibration,
     BinMD,
     ConvertUnits,
@@ -82,7 +83,7 @@ from mantid.geometry import (
     UnitCell,
 )
 
-from mantid.kernel import V3D
+from mantid.kernel import V3D, FloatTimeSeriesProperty
 
 from sklearn.cluster import DBSCAN
 
@@ -397,6 +398,11 @@ class UBModel(NeuXtalVizModel):
 
         grouping = inst["Grouping"]
 
+        LoadEmptyInstrument(
+            InstrumentName=inst["Name"],
+            OutputWorkspace="goniometer",
+        )
+
         if instrument == "DEMAND":
             filenames = [filepath.format(IPTS, exp, runs)]
             if np.all([os.path.exists(filename) for filename in filenames]):
@@ -480,9 +486,9 @@ class UBModel(NeuXtalVizModel):
                 )
                 return True
 
-    def calibrate_data(self, instrument, det_cal, tube_cal):
+    def calibrate_data(self, instrument, det_cal, gon_cal, tube_cal):
         """
-        Calibrate the loaded data using detector and tube calibration files.
+        Calibrate the loaded data using detector, goniometer, and tube calibration files.
 
         Parameters
         ----------
@@ -492,6 +498,8 @@ class UBModel(NeuXtalVizModel):
             Detector calibration file.
         tube_cal : str
             Tube calibration file.
+        gon_cal : str
+            Goniometer calibration file.
         """
 
         filepath = self.get_raw_file_path(instrument)
@@ -528,6 +536,55 @@ class UBModel(NeuXtalVizModel):
                             )
                     else:
                         LoadIsawDetCal(InputWorkspace="data", Filename=det_cal)
+
+            if (
+                gon_cal != ""
+                and os.path.exists(gon_cal)
+                and os.path.splitext(gon_cal)[1] == ".xml"
+            ):
+
+                LoadParameterFile(Workspace="goniometer", Filename=gon_cal)
+
+                inst = mtd["goniometer"].getInstrument()
+
+                workspaces = (
+                    list(mtd["data"].getNames())
+                    if mtd["data"].isGroup()
+                    else ["data"]
+                )
+
+                for workspace in workspaces:
+                    run = mtd[workspace].run()
+
+                    params = ["omega-offset", "chi-offset"]
+
+                    for i, param in enumerate(params):
+                        if inst.hasParameter(param):
+                            val = inst.getNumberParameter(param)[0]
+                            name = goniometers[i].split(",")[0]
+                            values = run.getProperty(name).value
+                            times = run.getProperty(name).times
+                            log = FloatTimeSeriesProperty(name)
+                            for t, v in zip(times, values):
+                                log.addValue(t, v + val)
+                            run[name] = log
+
+                    SetGoniometer(
+                        Workspace=workspace,
+                        Axis0=goniometers[0],
+                        Axis1=goniometers[1],
+                        Axis2=goniometers[2],
+                        Average=False if "HFIR" in filepath else True,
+                    )
+
+                    run = mtd[workspace].run()
+
+                    param = "goniometer-tilt"
+                    if inst.hasParameter(param):
+                        v = inst.getStringParameter(param)[0]
+                        G = np.array(v.split(",")).astype(float).reshape(3, 3)
+                        gon = run.getGoniometer()
+                        gon.setR(G @ gon.getR())
 
     def get_number_workspaces(self):
         """

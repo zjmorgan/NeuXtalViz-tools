@@ -25,6 +25,7 @@ class Experiment(NeuXtalVizPresenter):
         self.view.connect_peak_table(self.update_peaks)
         self.view.connect_load_mask(self.load_mask)
         self.view.connect_load_detector(self.load_detector)
+        self.view.connect_load_goniometer(self.load_goniometer)
 
         self.view.connect_roi_ready(self.lookup_angle)
         self.view.connect_viz_ready(self.visualize)
@@ -44,6 +45,14 @@ class Experiment(NeuXtalVizPresenter):
 
         if filename:
             self.view.set_detector_calibration(filename)
+
+    def load_goniometer(self):
+        inst = self.view.get_instrument()
+        path = self.model.get_calibration_file_path(inst)
+        filename = self.view.load_goniometer_cal_dialog(path)
+
+        if filename:
+            self.view.set_goniometer_calibration(filename)
 
     def load_mask(self):
         inst = self.view.get_instrument()
@@ -119,9 +128,10 @@ class Experiment(NeuXtalVizPresenter):
         instrument = self.view.get_instrument()
         motors = self.view.get_motors()
         cal = self.view.get_detector_calibration()
+        gon = self.view.get_goniometer_calibration()
         mask = self.view.get_mask()
 
-        self.model.initialize_instrument(instrument, motors, cal, mask)
+        self.model.initialize_instrument(instrument, motors, cal, gon, mask)
 
     def calculate_single(self):
         self.alt_hkl = False
@@ -447,6 +457,7 @@ class Experiment(NeuXtalVizPresenter):
     def update_plan(self):
         instrument = self.view.get_instrument()
         cal = self.view.get_detector_calibration()
+        gon = self.view.get_goniometer_calibration()
         mask = self.view.get_mask()
         mode = self.view.get_mode()
         settings = self.view.get_all_settings()
@@ -469,7 +480,7 @@ class Experiment(NeuXtalVizPresenter):
         self.model.create_plan(table)
         self.model.create_sample(instrument, mode, UB, wavelength, d_min)
         self.model.update_sample(crysal_system, point_group, lattice_centering)
-        self.model.update_goniometer_motors(limits, motors, cal, mask)
+        self.model.update_goniometer_motors(limits, motors, cal, gon, mask)
 
     def save_CSV(self):
         filename = self.view.save_CSV_file_dialog()
@@ -492,7 +503,7 @@ class Experiment(NeuXtalVizPresenter):
             plan, config, symm = self.model.load_experiment(filename)
 
             titles, settings, comments, counts, values, use = plan
-            instrument, mode, wl, d_min, lims, vals, cal, mask = config
+            instrument, mode, wl, d_min, lims, vals, cal, gon, mask = config
             cs, pg, lc = symm
 
             table = titles, settings, comments, counts, values, use
@@ -507,6 +518,7 @@ class Experiment(NeuXtalVizPresenter):
             self.view.set_goniometer_limits(lims)
             self.view.set_motors(vals)
             self.view.set_detector_calibration(cal)
+            self.view.set_goniometer_calibration(gon)
             self.view.set_mask(mask)
             self.view.set_crystal_system(cs)
             self.switch_crystal()

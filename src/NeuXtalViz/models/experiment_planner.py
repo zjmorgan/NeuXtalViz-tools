@@ -154,12 +154,16 @@ class ExperimentModel(NeuXtalVizModel):
             OutputWorkspace="coverage",
         )
 
-    def initialize_instrument(self, instrument, logs, cal, mask):
+    def initialize_instrument(self, instrument, logs, cal, gon, mask):
         inst = self.get_instrument_name(instrument)
 
         if not mtd.doesExist("instrument"):
             LoadEmptyInstrument(
                 InstrumentName=inst, OutputWorkspace="instrument"
+            )
+
+            CloneWorkspace(
+                InputWorkspace="instrument", OutputWorkspace="goniometer"
             )
 
             for key in logs.keys():
@@ -183,6 +187,10 @@ class ExperimentModel(NeuXtalVizModel):
                     LoadParameterFile(Workspace="instrument", Filename=cal)
                 else:
                     LoadIsawDetCal(InputWorkspace="instrument", Filename=cal)
+
+            if gon != "" and os.path.exists(gon):
+                if os.path.splitext(gon)[1] == ".xml":
+                    LoadParameterFile(Workspace="goniometer", Filename=gon)
 
             if mask != "" and os.path.exists(mask):
                 if not mtd.doesExist("mask"):
@@ -424,7 +432,7 @@ class ExperimentModel(NeuXtalVizModel):
                 LogType="String",
             )
 
-    def update_goniometer_motors(self, limits, motors, cal, mask):
+    def update_goniometer_motors(self, limits, motors, cal, gon, mask):
         if mtd.doesExist("sample"):
             mtd["sample"].run()["limits"] = np.array(limits).flatten().tolist()
 
@@ -435,6 +443,7 @@ class ExperimentModel(NeuXtalVizModel):
                 mtd["sample"].run()["motors"] = values
 
             mtd["sample"].run()["cal"] = cal
+            mtd["sample"].run()["gon"] = gon
             mtd["sample"].run()["mask"] = mask
 
     def load_UB(self, filename):
@@ -550,6 +559,7 @@ class ExperimentModel(NeuXtalVizModel):
         lims = mtd[sample].run().getProperty("limits").value
         mask = mtd[sample].run().getProperty("mask").value
         cal = mtd[sample].run().getProperty("cal").value
+        gon = mtd[sample].run().getProperty("gon").value
         lims = np.array(lims).reshape(-1, 2).tolist()
         vals = []
         if mtd[sample].run().hasProperty("motors"):
@@ -578,7 +588,7 @@ class ExperimentModel(NeuXtalVizModel):
             settings.append(angles)
 
         plan = (titles, settings, comments, counts, values, use)
-        config = (instrument, mode, wl, d_min, lims, vals, cal, mask)
+        config = (instrument, mode, wl, d_min, lims, vals, cal, gon, mask)
         symm = (cs, pg, lc)
 
         return plan, config, symm

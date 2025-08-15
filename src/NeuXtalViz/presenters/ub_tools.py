@@ -17,6 +17,7 @@ class UB(NeuXtalVizPresenter):
         self.view.connect_wavelength(self.update_wavelength)
 
         self.view.connect_browse_calibration(self.load_detector_calibration)
+        self.view.connect_browse_goniometer(self.load_goniometer_calibration)
         self.view.connect_browse_tube(self.load_tube_calibration)
 
         self.view.connect_convert_Q(self.convert_Q)
@@ -163,6 +164,7 @@ class UB(NeuXtalVizPresenter):
         wavelength = self.view.get_wavelength()
         tube_cal = self.view.get_tube_calibration()
         det_cal = self.view.get_detector_calibration()
+        gon_cal = self.view.get_goniometer_calibration()
 
         IPTS = self.view.get_IPTS()
         runs = self.view.get_runs()
@@ -200,7 +202,7 @@ class UB(NeuXtalVizPresenter):
 
             progress("Data calibrating...", 50)
 
-            self.model.calibrate_data(instrument, det_cal, tube_cal)
+            self.model.calibrate_data(instrument, det_cal, gon_cal, tube_cal)
 
             progress("Data calibrated...", 60)
 
@@ -870,6 +872,16 @@ class UB(NeuXtalVizPresenter):
 
         if filename:
             self.view.set_detector_calibration(filename)
+
+    def load_goniometer_calibration(self):
+        inst = self.view.get_instrument()
+
+        path = self.model.get_calibration_file_path(inst)
+
+        filename = self.view.load_goniometer_cal_dialog(path)
+
+        if filename:
+            self.view.set_goniometer_calibration(filename)
 
     def load_tube_calibration(self):
         inst = self.view.get_instrument()

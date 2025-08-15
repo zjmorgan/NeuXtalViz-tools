@@ -306,13 +306,21 @@ class UBView(NeuXtalVizWidget):
         orientation_layout.addWidget(self.vl_line, 3, 3)
 
         lattice_layout = QVBoxLayout()
+        directions_layout = QVBoxLayout()
+        modulation_layout = QVBoxLayout()
 
         lattice_layout.addLayout(parameters_layout)
         lattice_layout.addStretch(1)
 
+        directions_layout.addLayout(orientation_layout)
+        directions_layout.addStretch(1)
+
+        modulation_layout.addLayout(satellite_layout)
+        modulation_layout.addStretch(1)
+
         parameters_tab.setLayout(lattice_layout)
-        orientation_tab.setLayout(orientation_layout)
-        satellite_tab.setLayout(satellite_layout)
+        orientation_tab.setLayout(directions_layout)
+        satellite_tab.setLayout(modulation_layout)
 
         values_tab.addTab(parameters_tab, "Lattice Parameters")
         values_tab.addTab(orientation_tab, "Sample Orientation")
@@ -362,6 +370,7 @@ class UBView(NeuXtalVizWidget):
 
         self.cal_line = QLineEdit("")
         self.tube_line = QLineEdit("")
+        self.gon_line = QLineEdit("")
 
         self.wl_min_line = QLineEdit("0.3")
         self.wl_min_line.setToolTip("Minimum wavelength for conversion.")
@@ -393,6 +402,7 @@ class UBView(NeuXtalVizWidget):
 
         self.cal_browse_button = QPushButton("Detector", self)
         self.tube_browse_button = QPushButton("Tube", self)
+        self.gon_browse_button = QPushButton("Goniometer", self)
 
         experiment_params_layout.addWidget(self.instrument_combo)
         experiment_params_layout.addWidget(ipts_label)
@@ -410,8 +420,10 @@ class UBView(NeuXtalVizWidget):
 
         instrument_params_layout.addWidget(self.cal_line, 1, 0)
         instrument_params_layout.addWidget(self.cal_browse_button, 1, 1)
-        instrument_params_layout.addWidget(self.tube_line, 2, 0)
-        instrument_params_layout.addWidget(self.tube_browse_button, 2, 1)
+        instrument_params_layout.addWidget(self.gon_line, 2, 0)
+        instrument_params_layout.addWidget(self.gon_browse_button, 2, 1)
+        instrument_params_layout.addWidget(self.tube_line, 3, 0)
+        instrument_params_layout.addWidget(self.tube_browse_button, 3, 1)
 
         self.convert_to_q_button = QPushButton("Convert", self)
         self.convert_to_q_button.setToolTip("Convert raw data to Q workspace.")
@@ -1735,6 +1747,9 @@ class UBView(NeuXtalVizWidget):
     def connect_browse_tube(self, load_tube_cal):
         self.tube_browse_button.clicked.connect(load_tube_cal)
 
+    def connect_browse_goniometer(self, load_goniometer_cal):
+        self.gon_browse_button.clicked.connect(load_goniometer_cal)
+
     def connect_convert_Q(self, convert_Q):
         self.convert_to_q_button.clicked.connect(convert_Q)
 
@@ -1915,6 +1930,21 @@ class UBView(NeuXtalVizWidget):
 
         return filename
 
+    def load_goniometer_cal_dialog(self, path=""):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.AnyFile)
+
+        file_filters = "Goniometer files (*.xml)"
+
+        filename, _ = file_dialog.getOpenFileName(
+            self, "Load goniometer file", path, file_filters, options=options
+        )
+
+        return filename
+
     def load_tube_cal_dialog(self, path=""):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -2086,6 +2116,7 @@ class UBView(NeuXtalVizWidget):
             self.filter_time_line.setText("")
             self.tube_line.setEnabled(False)
             self.tube_browse_button.setEnabled(False)
+            self.gon_browse_button.setEnabled(True)
             if "CORELLI" in filepath:
                 self.tube_line.setEnabled(True)
                 self.tube_browse_button.setEnabled(True)
@@ -2096,6 +2127,7 @@ class UBView(NeuXtalVizWidget):
             self.cal_browse_button.setEnabled(False)
             self.tube_line.setEnabled(False)
             self.tube_browse_button.setEnabled(False)
+            self.gon_browse_button.setEnabled(False)
 
     def get_tube_calibration(self):
         return self.tube_line.text()
@@ -2103,11 +2135,17 @@ class UBView(NeuXtalVizWidget):
     def get_detector_calibration(self):
         return self.cal_line.text()
 
+    def get_goniometer_calibration(self):
+        return self.gon_line.text()
+
     def set_tube_calibration(self, filename):
         return self.tube_line.setText(filename)
 
     def set_detector_calibration(self, filename):
         return self.cal_line.setText(filename)
+
+    def set_goniometer_calibration(self, filename):
+        return self.gon_line.setText(filename)
 
     def get_IPTS(self):
         if self.ipts_line.hasAcceptableInput():

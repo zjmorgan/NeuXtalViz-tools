@@ -14,7 +14,6 @@ from PyQt5.QtWidgets import (
 )
 import subprocess
 
-
 import qdarktheme
 
 qdarktheme.enable_hi_dpi()
