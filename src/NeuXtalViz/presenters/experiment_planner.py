@@ -257,6 +257,7 @@ class Experiment(NeuXtalVizPresenter):
         vals = self.model.get_angles(gamma, nu)
         if vals is not None:
             angles, gamma, nu, lamda, gamma_alt, nu_alt, lamda_alt = vals
+            self.view.set_comment(self.model.comment)
             self.view.set_angles(angles)
             self.view.set_horizontal(gamma)
             self.view.set_vertical(nu)

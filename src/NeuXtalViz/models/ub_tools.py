@@ -132,7 +132,11 @@ class UBModel(NeuXtalVizModel):
     """
     Model for UB matrix and peak table operations in NeuXtalViz.
 
-    Provides methods for loading, saving, and manipulating crystallographic data, including peak finding, UB matrix determination, lattice refinement, and clustering. Integrates with Mantid algorithms for data processing and supports both conventional and modulated structures.
+    Provides methods for loading, saving, and manipulating
+    crystallographic data, including peak finding, UB matrix
+    determination, lattice refinement, and clustering. Integrates with
+    Mantid algorithms for data processing and supports both conventional
+    and modulated structures.
     """
 
     def __init__(self):
@@ -210,7 +214,8 @@ class UBModel(NeuXtalVizModel):
 
     def update_UB(self):
         """
-        Update the UB matrix on the sample and synchronize with Mantid workspaces.
+        Update the UB matrix on the sample and synchronize with Mantid
+        workspaces.
         """
 
         UB = self.get_UB()
@@ -488,7 +493,8 @@ class UBModel(NeuXtalVizModel):
 
     def calibrate_data(self, instrument, det_cal, gon_cal, tube_cal):
         """
-        Calibrate the loaded data using detector, goniometer, and tube calibration files.
+        Calibrate the loaded data using detector, goniometer, and tube
+        calibration files.
 
         Parameters
         ----------
@@ -2389,6 +2395,92 @@ class UBModel(NeuXtalVizModel):
         """
 
         SaveNexus(Filename=filename, InputWorkspace=self.table)
+
+    def delete_peaks(self, peaks):
+        """
+        Remove peaks.
+
+        Parameters
+        ----------
+        peaks : str
+            Name of peaks table to be added.
+
+        """
+
+        if mtd.doesExist(peaks):
+            DeleteWorkspace(Workspace=peaks)
+
+    def filter_peaks(self, name, operator, value):
+        """
+        Filter out peaks based on value and operator.
+
+        Parameters
+        ----------
+        name : str
+            Filter name.
+        operator : float
+            Filter operator.
+        value : float
+            The filter value.
+
+        """
+
+        FilterPeaks(
+            InputWorkspace=self.table,
+            OutputWorkspace=self.table,
+            FilterVariable=variable[name],
+            FilterValue=value,
+            Operator=operator,
+            Criterion="!=",
+            BankName="None",
+        )
+
+    def get_d_min(self):
+        d_min = 0.7
+        if self.has_peaks():
+            for peak in mtd[self.table]:
+                d_spacing = peak.getDSpacing()
+                if d_spacing < d_min:
+                    d_min = d_spacing
+        return d_min
+
+    def avoid_aluminum_contamination(self, d_min, d_max, delta=0.1):
+        aluminum = CrystalStructure(
+            "4.05 4.05 4.05", "F m -3 m", "Al 0 0 0 1.0 0.005"
+        )
+
+        generator = ReflectionGenerator(aluminum)
+
+        hkls = generator.getUniqueHKLsUsingFilter(
+            d_min, d_max, ReflectionConditionFilter.StructureFactor
+        )
+
+        ds = list(generator.getDValues(hkls))
+
+        if self.has_peaks():
+            for peak in mtd[self.table]:
+                d_spacing = peak.getDSpacing()
+                Q_mod = 2 * np.pi / d_spacing
+                for d in ds:
+                    Q = 2 * np.pi / d
+                    if Q - delta < Q_mod < Q + delta or d_spacing > d_max:
+                        peak.setRunNumber(-1)
+
+            FilterPeaks(
+                InputWorkspace=self.table,
+                OutputWorkspace=self.table,
+                FilterVariable="RunNumber",
+                FilterValue="-1",
+                Operator="!=",
+                Criterion="!=",
+                BankName="None",
+            )
+
+    def get_modulation_info(self):
+        if self.has_peaks() and self.has_UB():
+            ol = mtd[self.cell].sample().getOrientedLattice()
+
+            return [ol.getModVec(i) for i in range(3)]
 
     def get_peak_info(self):
         """

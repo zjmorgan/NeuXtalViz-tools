@@ -75,16 +75,16 @@ point_group_centering = {
     "32 r": ["P"],
     "3m r": ["P"],
     "-3m r": ["P"],
-    "3": ["Robv", "Rrev"],
-    "-3": ["Robv", "Rrev"],
-    "312": ["Robv", "Rrev"],
-    "31m": ["Robv", "Rrev"],
-    "32": ["Robv", "Rrev"],
-    "321": ["Robv", "Rrev"],
-    "3m": ["Robv", "Rrev"],
-    "-31m": ["Robv", "Rrev"],
-    "-3m": ["Robv", "Rrev"],
-    "-3m1": ["Robv", "Rrev"],
+    "3": ["P", "Robv", "Rrev"],
+    "-3": ["P", "Robv", "Rrev"],
+    "312": ["P", "Robv", "Rrev"],
+    "31m": ["P", "Robv", "Rrev"],
+    "32": ["P", "Robv", "Rrev"],
+    "321": ["P", "Robv", "Rrev"],
+    "3m": ["P", "Robv", "Rrev"],
+    "-31m": ["P", "Robv", "Rrev"],
+    "-3m": ["P", "Robv", "Rrev"],
+    "-3m1": ["P", "Robv", "Rrev"],
     "6": ["P"],
     "-6": ["P"],
     "6/m": ["P"],
@@ -153,6 +153,8 @@ class ExperimentModel(NeuXtalVizModel):
             OutputType="LeanElasticPeak",
             OutputWorkspace="coverage",
         )
+
+        self.comment = ""
 
     def initialize_instrument(self, instrument, logs, cal, gon, mask):
         inst = self.get_instrument_name(instrument)
@@ -689,7 +691,7 @@ class ExperimentModel(NeuXtalVizModel):
     def calculate_individual_peak(
         self, hkl, wavelength, axes, polarities, limits, step=1
     ):
-        self.comment = "(" + " ".join(np.array(hkl).astype(str)) + ")"
+        self.comment = "#(" + " ".join(np.array(hkl).astype(str)) + ")"
 
         if np.isclose(wavelength[0], wavelength[1]):
             wavelength = [0.975 * wavelength[0], 1.025 * wavelength[1]]
@@ -817,7 +819,13 @@ class ExperimentModel(NeuXtalVizModel):
     def simultaneous_peaks_hkl(
         self, hkl_1, hkl_2, wavelength, axes, polarities, limits, step=1
     ):
-        self.comment = "(" + " ".join(np.array(hkl_1).astype(str)) + ")"
+        self.comment = (
+            "#("
+            + " ".join(np.array(hkl_1).astype(str))
+            + ")_#("
+            + " ".join(np.array(hkl_2).astype(str))
+            + ")"
+        )
 
         if np.isclose(wavelength[0], wavelength[1]):
             wavelength = [0.975 * wavelength[0], 1.025 * wavelength[1]]

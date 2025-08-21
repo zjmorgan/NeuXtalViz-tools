@@ -5,11 +5,9 @@ from qtpy.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QHeaderView,
-    QFrame,
     QGridLayout,
     QHBoxLayout,
     QVBoxLayout,
-    QFormLayout,
     QPushButton,
     QCheckBox,
     QComboBox,
@@ -182,7 +180,7 @@ class ExperimentView(NeuXtalVizWidget):
         angstrom_label = QLabel("Å")
 
         settings_label = QLabel("Settings")
-        self.settings_line = QLineEdit("20")
+        self.settings_line = QLineEdit("10")
         self.settings_line.setToolTip(
             "Set the number of settings for the experiment plan."
         )
@@ -357,7 +355,7 @@ class ExperimentView(NeuXtalVizWidget):
         self.ax_cov = fig.subplots(3, 1, sharex=True)
         self.ax_cov[2].set_xlabel("Resolution Shell [Å]")
         self.ax_cov[0].set_ylabel("Completeness [%]")
-        self.ax_cov[1].set_ylabel("Multiplicity")
+        self.ax_cov[1].set_ylabel("Redundancy")
         self.ax_cov[2].set_ylabel("Unique Reflections")
 
         coverage_layout.addLayout(settings_layout)
@@ -417,7 +415,7 @@ class ExperimentView(NeuXtalVizWidget):
         nu_label = QLabel("ν [°]", self)
         nu_label.setToolTip("Nu angle (vertical) in degrees.")
         intersect_label = QLabel("λ [Å]", self)
-        intersect_label.setToolTip("Wavelength at intersection in Ångström.")
+        intersect_label.setToolTip("Wavelength in Ångström.")
 
         self.horizontal_line = QLineEdit()
         self.horizontal_line.setToolTip(
@@ -523,15 +521,23 @@ class ExperimentView(NeuXtalVizWidget):
         self.add_button.setToolTip("Add the current orientation to the plan.")
 
         self.angles_line = QLineEdit()
-        self.angles_line.setToolTip(
-            "Display the angles for the selected orientation."
-        )
+        self.angles_line.setToolTip("Goniometer angles for the selected peak.")
         self.angles_line.setReadOnly(True)
+
+        self.comment_line = QLineEdit()
+        self.comment_line.setToolTip("Selected peak(s).")
+        self.angles_line.setReadOnly(True)
+
+        settings_label = QLabel("Settings:", self)
+        angles_label = QLabel("Goniometer angles:", self)
 
         self.angles_combo = QComboBox(self)
         self.angles_combo.setToolTip("Select an orientation from the list.")
+        orientation_layout.addWidget(settings_label)
         orientation_layout.addWidget(self.angles_combo)
+        orientation_layout.addWidget(angles_label)
         orientation_layout.addWidget(self.angles_line)
+        orientation_layout.addWidget(self.comment_line)
         orientation_layout.addWidget(self.add_button)
 
         peak_layout.addLayout(orientation_layout)
@@ -900,7 +906,7 @@ class ExperimentView(NeuXtalVizWidget):
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             else:
                 free.append(angle)
-        self.goniometer_table.itemChanged.connect(self.update_limits)
+            self.goniometer_table.itemChanged.connect(self.update_limits)
         self.goniometer_table.blockSignals(False)
 
         self.motor_table.setRowCount(0)
@@ -1400,15 +1406,25 @@ class ExperimentView(NeuXtalVizWidget):
 
         x = np.arange(len(shel))
 
-        self.ax_cov[0].bar(x, comp, width, color=color[0])
-        self.ax_cov[1].bar(x, mult, width, color=color[2])
-        self.ax_cov[2].bar(x, refl, width, color=color[4])
+        self.ax_cov[0].bar(x, comp, width, color=color[0], label="Symmetry")
+        self.ax_cov[1].bar(x, mult, width, color=color[2], label="Symmetry")
+        self.ax_cov[2].bar(x, refl, width, color=color[4], label="Symmetry")
 
         shel, comp, mult, refl = asym
 
-        self.ax_cov[0].bar(x + width, comp, width, color=color[1])
-        self.ax_cov[1].bar(x + width, mult, width, color=color[3])
-        self.ax_cov[2].bar(x + width, refl, width, color=color[5])
+        self.ax_cov[0].bar(
+            x + width, comp, width, color=color[1], label="No symmetry"
+        )
+        self.ax_cov[1].bar(
+            x + width, mult, width, color=color[3], label="No symmetry"
+        )
+        self.ax_cov[2].bar(
+            x + width, refl, width, color=color[5], label="No symmetry"
+        )
+
+        self.ax_cov[0].legend(shadow=True)
+        self.ax_cov[1].legend(shadow=True)
+        self.ax_cov[2].legend(shadow=True)
 
         self.ax_cov[0].set_ylim(0, 100)
 
@@ -1594,6 +1610,9 @@ class ExperimentView(NeuXtalVizWidget):
         ang = "(" + ", ".join(np.array(values).astype(str)) + ")"
 
         self.angles_line.setText(ang)
+
+    def set_comment(self, values):
+        self.comment_line.setText(str(values))
 
     def get_angles(self):
         ang = self.angles_line.text()
