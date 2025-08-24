@@ -81,6 +81,7 @@ config["Q.convention"] = "Crystallography"
 from mantid.geometry import (
     CrystalStructure,
     ReflectionGenerator,
+    ReflectionConditionFilter,
     PointGroupFactory,
     UnitCell,
 )

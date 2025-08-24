@@ -42,8 +42,9 @@ class NeuXtalVizWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._worker_running = False
 
-        self.proj_box = QCheckBox("Parallel Projection", self)
+        self.proj_box = QCheckBox("Enable Parallel Projection", self)
         self.proj_box.setChecked(True)
         self.proj_box.setToolTip("Toggle parallel projection for the 3D view.")
         self.proj_box.clicked.connect(self.change_projection)
@@ -58,7 +59,7 @@ class NeuXtalVizWidget(QWidget):
         self.camera_button.setToolTip("Reset the camera position.")
         self.camera_button.clicked.connect(self.reset_camera)
 
-        self.recip_box = QCheckBox("Reciprocal Lattice", self)
+        self.recip_box = QCheckBox("Toggle Reciprocal Lattice", self)
         self.recip_box.setChecked(True)
         self.recip_box.setToolTip("Show or hide reciprocal lattice vectors.")
 
@@ -68,6 +69,11 @@ class NeuXtalVizWidget(QWidget):
             "Show or hide the coordinate axes in the plot."
         )
         self.axes_box.clicked.connect(self.show_axes)
+
+        self.cons_box = QCheckBox("Expand Console", self)
+        self.cons_box.setChecked(True)
+        self.cons_box.setToolTip("Show or hide console output.")
+        self.cons_box.stateChanged.connect(self.toggle_console)
 
         self.save_button = QPushButton("Save Screenshot", self)
         self.save_button.setToolTip(
@@ -94,6 +100,7 @@ class NeuXtalVizWidget(QWidget):
         right_layout.addWidget(self.recip_box)
         right_layout.addWidget(self.axes_box)
         right_layout.addWidget(self.proj_box)
+        right_layout.addWidget(self.cons_box)
 
         view_tab = self.__init_view_tab()
 
@@ -122,7 +129,6 @@ class NeuXtalVizWidget(QWidget):
         self.console.setFont(font)
 
         vis_layout.addWidget(self.console)
-
         vis_layout.addWidget(self.status_bar)
 
         layout.addLayout(vis_layout, stretch=1)
@@ -135,9 +141,6 @@ class NeuXtalVizWidget(QWidget):
         self.threadpool = ThreadPool()
 
         self.plotter.enable_parallel_projection()
-
-    def append_to_console(self, text):
-        self.console.appendPlainText(text)
 
     def __init_view_tab(self):
         view_tab = QTabWidget()
@@ -222,6 +225,14 @@ class NeuXtalVizWidget(QWidget):
         self.my_button.setToolTip("View along the -Qy direction.")
         self.mz_button = QPushButton("-Qz", self)
         self.mz_button.setToolTip("View along the -Qz direction.")
+
+        self.px_button.clicked.connect(self.view_yz)
+        self.py_button.clicked.connect(self.view_zx)
+        self.pz_button.clicked.connect(self.view_xy)
+
+        self.mx_button.clicked.connect(self.view_zy)
+        self.my_button.clicked.connect(self.view_xz)
+        self.mz_button.clicked.connect(self.view_yx)
 
         self.a_star_button = QPushButton("a*", self)
         self.a_star_button.setToolTip(
@@ -373,11 +384,19 @@ class NeuXtalVizWidget(QWidget):
 
         return info_tab
 
+    def append_to_console(self, text):
+        self.console.appendPlainText(text)
+
+    def toggle_console(self, state):
+        self.console.setVisible(bool(state))
+
+    def toggle_console(self, state):
+        self.console.setVisible(bool(state))
+
     def start_worker_pool(self, worker):
         """
         Create a worker pool and connect output to console.
         """
-
         worker.signals.output.connect(self.append_to_console)
         self.threadpool.start_worker_pool(worker)
 

@@ -2063,6 +2063,7 @@ class UBView(NeuXtalVizWidget):
         if rows is not None:
             for row in range(rows):
                 self.data_combo.addItem((str(row + 1)))
+            self.data_combo.setCurrentIndex(0)
 
     def get_data_list(self):
         val = self.data_combo.currentText()

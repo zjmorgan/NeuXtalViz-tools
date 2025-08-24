@@ -36,11 +36,9 @@ from mantid.geometry import OrientedLattice
 
 import logging
 from mantid.utils.logging import log_to_python
-from mantid.kernel import logger
 
-log_to_python()
+log_to_python(level="notice")
 log = logging.getLogger("Mantid")
-logger.information("This message is send to `log` defined above.")
 
 import numpy as np
 
