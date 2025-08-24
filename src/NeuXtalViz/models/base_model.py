@@ -33,6 +33,15 @@ get_vector(axes_type, ind)
 
 from mantid.simpleapi import HasUB
 from mantid.geometry import OrientedLattice
+
+import logging
+from mantid.utils.logging import log_to_python
+from mantid.kernel import logger
+
+log_to_python()
+log = logging.getLogger("Mantid")
+logger.information("This message is send to `log` defined above.")
+
 import numpy as np
 
 

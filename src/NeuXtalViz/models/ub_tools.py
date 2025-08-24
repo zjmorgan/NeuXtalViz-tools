@@ -79,6 +79,8 @@ from mantid import config
 config["Q.convention"] = "Crystallography"
 
 from mantid.geometry import (
+    CrystalStructure,
+    ReflectionGenerator,
     PointGroupFactory,
     UnitCell,
 )
@@ -671,6 +673,24 @@ class UBModel(NeuXtalVizModel):
                     OutputWorkspace="md",
                 )
             else:
+
+                if min_d is None:
+                    k = 2 * np.pi / min(wavelength)
+                    Q_max = k * np.sin(0.5 * max(two_theta))
+
+                ConvertUnits(
+                    InputWorkspace="data",
+                    Target="MomentumTransfer",
+                    OutputWorkspace="data",
+                )
+
+                CropWorkspace(
+                    InputWorkspace="data",
+                    XMin=0,
+                    XMax=Q_max,
+                    OutputWorkspace="data",
+                )
+
                 ConvertUnits(
                     InputWorkspace="data",
                     Target="Wavelength",
@@ -710,10 +730,6 @@ class UBModel(NeuXtalVizModel):
                     Rs.append(mtd[ws].run().getGoniometer().getR())
 
                 counts = [mtd[ws].extractY().copy() for ws in input_ws_names]
-
-                if min_d is None:
-                    k = 2 * np.pi / min(wavelength)
-                    Q_max = k * np.sin(0.5 * max(two_theta))
 
                 ConvertToMD(
                     InputWorkspace="data",

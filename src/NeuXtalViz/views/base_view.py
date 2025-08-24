@@ -13,10 +13,11 @@ from qtpy.QtWidgets import (
     QStatusBar,
     QTabWidget,
     QFileDialog,
+    QPlainTextEdit,
 )
 
-from qtpy.QtGui import QDoubleValidator
-from PyQt5.QtCore import Qt
+from qtpy.QtGui import QDoubleValidator, QFont
+from PyQt5.QtCore import Qt, pyqtSignal
 
 import numpy as np
 import pyvista as pv
@@ -36,6 +37,8 @@ class NeuXtalVizWidget(QWidget):
     Base widget for all NeuXtalViz views, providing shared functionality
     and interface for user-facing widgets.
     """
+
+    log_output = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -111,6 +114,15 @@ class NeuXtalVizWidget(QWidget):
         self.progress_bar = QProgressBar()
         self.status_bar.addPermanentWidget(self.progress_bar)
 
+        self.console = QPlainTextEdit(readOnly=True)
+
+        font = QFont("Courier New")
+        font.setStyleHint(QFont.Monospace)
+        font.setPointSize(10)
+        self.console.setFont(font)
+
+        vis_layout.addWidget(self.console)
+
         vis_layout.addWidget(self.status_bar)
 
         layout.addLayout(vis_layout, stretch=1)
@@ -123,6 +135,9 @@ class NeuXtalVizWidget(QWidget):
         self.threadpool = ThreadPool()
 
         self.plotter.enable_parallel_projection()
+
+    def append_to_console(self, text):
+        self.console.appendPlainText(text)
 
     def __init_view_tab(self):
         view_tab = QTabWidget()
@@ -360,10 +375,10 @@ class NeuXtalVizWidget(QWidget):
 
     def start_worker_pool(self, worker):
         """
-        Create a worker pool.
-
+        Create a worker pool and connect output to console.
         """
 
+        worker.signals.output.connect(self.append_to_console)
         self.threadpool.start_worker_pool(worker)
 
     def worker(self, task):

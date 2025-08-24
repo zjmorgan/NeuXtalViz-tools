@@ -1,5 +1,10 @@
 import sys
 import traceback
+import io
+import contextlib
+
+import io
+import contextlib
 
 from qtpy.QtCore import QRunnable, QThreadPool, Signal, QObject, Slot
 
@@ -9,6 +14,7 @@ class WorkerSignals(QObject):
     error = Signal(tuple)
     progress = Signal(str, int)
     result = Signal(object)
+    output = Signal(str)
 
 
 class Worker(QRunnable):
@@ -24,16 +30,21 @@ class Worker(QRunnable):
 
     @Slot()
     def run(self):
-        try:
-            result = self.task(*self.args, **self.kwargs)
-        except:
-            traceback.print_exc()
-            exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit((exctype, value, traceback.format_exc()))
-        else:
-            self.signals.result.emit(result)
-        finally:
-            self.signals.finished.emit()
+        f = io.StringIO()
+        with contextlib.redirect_stdout(f), contextlib.redirect_stderr(f):
+            try:
+                result = self.task(*self.args, **self.kwargs)
+            except:
+                traceback.print_exc()
+                exctype, value = sys.exc_info()[:2]
+                self.signals.error.emit(
+                    (exctype, value, traceback.format_exc())
+                )
+            else:
+                self.signals.result.emit(result)
+            finally:
+                self.signals.finished.emit()
+        self.signals.output.emit(f.getvalue())
 
     def emit_progress(self, message, progress):
         self.signals.progress.emit(message, progress)
