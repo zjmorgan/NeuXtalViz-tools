@@ -1569,6 +1569,8 @@ class UBModel(NeuXtalVizModel):
 
         LoadIsawUB(InputWorkspace=self.cell, Filename=filename)
 
+        self.copy_UB_to_peaks()
+
     def determine_UB_with_niggli_cell(self, min_d, max_d, tol=0.1):
         """
         Determine UB with primitive lattice using min/max lattice constant.
