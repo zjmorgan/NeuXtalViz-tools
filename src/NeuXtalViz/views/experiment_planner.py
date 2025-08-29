@@ -1635,17 +1635,60 @@ class ExperimentView(NeuXtalVizWidget):
         for line in self.ax_inst.lines:
             line.remove()
 
-        horz, vert = self.get_horizontal(), self.get_vertical()
+        xmin, xmax = self.ax_inst.get_xlim()
+        ymin, ymax = self.ax_inst.get_ylim()
 
-        self.ax_inst.axvline(x=horz, color="k", linestyle="--")
-        self.ax_inst.axhline(y=vert, color="k", linestyle="--")
+        horz, vert = self.get_horizontal(), self.get_vertical()
 
         horz_alt = self.get_horizontal_alternate()
         vert_alt = self.get_vertical_alternate()
 
-        if horz_alt is not None and vert_alt is not None:
-            self.ax_inst.axvline(x=horz_alt, color="k", linestyle=":")
-            self.ax_inst.axhline(y=vert_alt, color="k", linestyle=":")
+        if horz_alt is None and vert_alt is None:
+            self.ax_inst.axvline(x=horz, color="k", linestyle="--")
+            self.ax_inst.axhline(y=vert, color="k", linestyle="--")
+        else:
+
+            horz_min = 0 if horz > horz_alt else (horz - xmin) / (xmax - xmin)
+            horz_max = 1 if horz < horz_alt else (horz - xmin) / (xmax - xmin)
+
+            vert_min = 0 if vert < vert_alt else (vert - ymin) / (ymax - ymin)
+            vert_max = 1 if vert > vert_alt else (vert - ymin) / (ymax - ymin)
+
+            horz_alt_min = (
+                0 if horz_alt > horz else (horz_alt - xmin) / (xmax - xmin)
+            )
+            horz_alt_max = (
+                1 if horz_alt < horz else (horz_alt - xmin) / (xmax - xmin)
+            )
+
+            vert_alt_min = (
+                0 if vert_alt < vert else (vert_alt - ymin) / (ymax - ymin)
+            )
+            vert_alt_max = (
+                1 if vert_alt > vert else (vert_alt - ymin) / (ymax - ymin)
+            )
+
+            self.ax_inst.axvline(
+                x=horz, color="k", linestyle="--", ymin=vert_min, ymax=vert_max
+            )
+            self.ax_inst.axhline(
+                y=vert, color="k", linestyle="--", xmin=horz_min, xmax=horz_max
+            )
+
+            self.ax_inst.axvline(
+                x=horz_alt,
+                color="k",
+                linestyle=":",
+                ymin=vert_alt_min,
+                ymax=vert_alt_max,
+            )
+            self.ax_inst.axhline(
+                y=vert_alt,
+                color="k",
+                linestyle=":",
+                xmin=horz_alt_min,
+                xmax=horz_alt_max,
+            )
 
         self.canvas_inst.draw_idle()
         self.canvas_inst.flush_events()
