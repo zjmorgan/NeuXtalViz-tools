@@ -26,7 +26,7 @@ from mantid.simpleapi import (
     MaskDetectors,
     ExtractMonitors,
     PreprocessDetectorsToMD,
-    GroupDetectors,
+    SmoothNeighbours,
     MaskBTP,
     AddSampleLog,
     CreateSampleWorkspace,
@@ -234,39 +234,17 @@ class ExperimentModel(NeuXtalVizModel):
             PreprocessDetectorsToMD(
                 InputWorkspace="instrument", OutputWorkspace="detectors"
             )
+            mask = np.array(mtd["detectors"].column(7)) != 0
+            det_ID = np.array(mtd["detectors"].column(4))[mask]
+            det_ID = np.insert(det_ID, -1, -1)
 
-            grouping = beamlines[instrument]["Grouping"]
+            c, r = beamlines[instrument]["Grouping"].split("x")
 
-            c, r = [int(val) for val in grouping.split("x")]
-            shape = (-1, cols, rows)
-
-            det_map = np.array(mtd["detectors"].column(5)).reshape(*shape)
-
-            shape = det_map.shape
-            i, j, k = np.meshgrid(
-                np.arange(shape[0]),
-                np.arange(shape[1]),
-                np.arange(shape[2]),
-                indexing="ij",
-            )
-            mask = np.array(mtd["detectors"].column(7)) == 0
-
-            keys = np.stack((i, j // c, k // r), axis=-1)
-            keys_flat = keys.reshape(-1, keys.shape[-1])
-            det_map_flat = det_map.ravel()[mask].astype(str)
-            grouped_ids = defaultdict(list)
-
-            for key, detector_id in zip(map(tuple, keys_flat), det_map_flat):
-                grouped_ids[key].append(detector_id)
-
-            detector_list = ",".join(
-                "+".join(group) for group in grouped_ids.values()
-            )
-
-            GroupDetectors(
+            SmoothNeighbours(
                 InputWorkspace="instrument",
                 OutputWorkspace="instrument",
-                GroupingPattern=detector_list,
+                SumPixelsX=c,
+                SumPixelsY=r,
             )
 
             CreatePeaksWorkspace(
@@ -290,10 +268,14 @@ class ExperimentModel(NeuXtalVizModel):
                 OutputWorkspace="combined",
             )
 
+            PreprocessDetectorsToMD(
+                InputWorkspace="instrument", OutputWorkspace="detectors"
+            )
+            mask = np.array(mtd["detectors"].column(7)) == 0
+
             L2 = np.array(mtd["detectors"].column(1))[mask]
             tt = np.array(mtd["detectors"].column(2))[mask]
             az = np.array(mtd["detectors"].column(3))[mask]
-            det_ID = np.array(mtd["detectors"].column(4))[mask]
 
             x = L2 * np.sin(tt) * np.cos(az)
             y = L2 * np.sin(tt) * np.sin(az)
@@ -658,7 +640,8 @@ class ExperimentModel(NeuXtalVizModel):
 
         hkls = pg.getEquivalents(hkl) if equiv else [hkl]
 
-        angles, angles_gamma, angles_nu, angles_lamda = [], [], [], []
+        indices, angles = [], []
+        angles_gamma, angles_nu, angles_lamda = [], [], []
 
         for hkl in hkls:
             settings, values = self.calculate_individual_peak(
@@ -667,21 +650,27 @@ class ExperimentModel(NeuXtalVizModel):
 
             gamma, nu, lamda = values
 
+            indices.append([hkl] * len(lamda))
             angles.append(settings)
             angles_gamma.append(gamma)
             angles_nu.append(nu)
             angles_lamda.append(lamda)
 
-        angles = np.row_stack(angles)
+        angles = np.vstack(angles)
+
+        indices = np.vstack(indices)
         gamma = np.concatenate(angles_gamma)
         nu = np.concatenate(angles_nu)
         lamda = np.concatenate(angles_lamda)
 
         self.angles = angles
+
+        self.angles_indices = indices
         self.angles_gamma = gamma
         self.angles_nu = nu
         self.angles_lamda = lamda
 
+        self.angles_indices_alt = None
         self.angles_gamma_alt = None
         self.angles_nu_alt = None
         self.angles_lamda_alt = None
@@ -691,7 +680,6 @@ class ExperimentModel(NeuXtalVizModel):
     def calculate_individual_peak(
         self, hkl, wavelength, axes, polarities, limits, step=1
     ):
-        self.comment = "#(" + " ".join(np.array(hkl).astype(str)) + ")"
 
         if np.isclose(wavelength[0], wavelength[1]):
             wavelength = [0.975 * wavelength[0], 1.025 * wavelength[1]]
@@ -744,7 +732,7 @@ class ExperimentModel(NeuXtalVizModel):
             mask = []
             for i in range(len(k)):
                 peak = mtd["peaks"].createPeak(V3D(Qx[i], Qy[i], Qz[i]))
-                mask.append(peak.getDetectorID() in self.det_ID)
+                mask.append(peak.getDetectorID() not in self.det_ID)
 
             mask = np.array(mask)
 
@@ -775,8 +763,10 @@ class ExperimentModel(NeuXtalVizModel):
 
         pairs = list(itertools.product(hkls_1, hkls_2))
 
-        angles, angles_gamma, angles_nu, angles_lamda = [], [], [], []
+        angles = []
+        indices, indices_alt = [], []
 
+        angles_gamma, angles_nu, angles_lamda = [], [], []
         angles_gamma_alt, angles_nu_alt, angles_lamda_alt = [], [], []
 
         for hkl_1, hkl_2 in pairs:
@@ -788,28 +778,37 @@ class ExperimentModel(NeuXtalVizModel):
             gamma1, nu1, lamda1 = values1
 
             angles.append(settings)
+
+            indices.append([list(hkl_1)] * len(lamda0))
             angles_gamma.append(gamma0)
             angles_nu.append(nu0)
             angles_lamda.append(lamda0)
 
+            indices_alt.append([list(hkl_2)] * len(lamda1))
             angles_gamma_alt.append(gamma1)
             angles_nu_alt.append(nu1)
             angles_lamda_alt.append(lamda1)
 
-        angles = np.row_stack(angles)
+        angles = np.vstack(angles)
+
+        indices = np.vstack(indices)
         gamma = np.concatenate(angles_gamma)
         nu = np.concatenate(angles_nu)
         lamda = np.concatenate(angles_lamda)
 
+        indices_alt = np.vstack(indices_alt)
         gamma_alt = np.concatenate(angles_gamma_alt)
         nu_alt = np.concatenate(angles_nu_alt)
         lamda_alt = np.concatenate(angles_lamda_alt)
 
         self.angles = angles
+
+        self.angles_indices = indices
         self.angles_gamma = gamma
         self.angles_nu = nu
         self.angles_lamda = lamda
 
+        self.angles_indices_alt = indices_alt
         self.angles_gamma_alt = gamma_alt
         self.angles_nu_alt = nu_alt
         self.angles_lamda_alt = lamda_alt
@@ -819,14 +818,6 @@ class ExperimentModel(NeuXtalVizModel):
     def simultaneous_peaks_hkl(
         self, hkl_1, hkl_2, wavelength, axes, polarities, limits, step=1
     ):
-        self.comment = (
-            "#("
-            + " ".join(np.array(hkl_1).astype(str))
-            + ")_#("
-            + " ".join(np.array(hkl_2).astype(str))
-            + ")"
-        )
-
         if np.isclose(wavelength[0], wavelength[1]):
             wavelength = [0.975 * wavelength[0], 1.025 * wavelength[1]]
 
@@ -907,9 +898,10 @@ class ExperimentModel(NeuXtalVizModel):
             for i in range(len(k1)):
                 peak0 = mtd["peaks"].createPeak(V3D(Q0x[i], Q0y[i], Q0z[i]))
                 peak1 = mtd["peaks"].createPeak(V3D(Q1x[i], Q1y[i], Q1z[i]))
+                det_ID0 = peak0.getDetectorID()
+                det_ID1 = peak1.getDetectorID()
                 mask.append(
-                    (peak0.getDetectorID() in self.det_ID)
-                    & (peak1.getDetectorID() in self.det_ID)
+                    (det_ID0 not in self.det_ID) & (det_ID1 not in self.det_ID)
                 )
 
             mask = np.array(mask)
@@ -941,10 +933,20 @@ class ExperimentModel(NeuXtalVizModel):
 
             gamma_alt = nu_alt = lamda_alt = None
 
+            self.comment = (
+                "#(" + ", ".join(self.angles_indices[i].astype(str)) + ")"
+            )
+
             if self.angles_lamda_alt is not None:
                 gamma_alt = self.angles_gamma_alt[i]
                 nu_alt = self.angles_nu_alt[i]
                 lamda_alt = self.angles_lamda_alt[i]
+
+                self.comment += (
+                    ")_#("
+                    + ", ".join(self.angles_indices_alt[i].astype(str))
+                    + ")"
+                )
 
             return angles, gamma, nu, lamda, gamma_alt, nu_alt, lamda_alt
 
@@ -1035,7 +1037,7 @@ class ExperimentModel(NeuXtalVizModel):
                 DeleteTableRows(TableWorkspace=ws, Rows=no)
 
         for no in range(mtd[ws].getNumberPeaks() - 1, 0, -1):
-            if mtd[ws].getPeak(no).getDetectorID() not in self.det_ID:
+            if mtd[ws].getPeak(no).getDetectorID() in self.det_ID:
                 DeleteTableRows(TableWorkspace=ws, Rows=no)
 
         SortPeaksWorkspace(

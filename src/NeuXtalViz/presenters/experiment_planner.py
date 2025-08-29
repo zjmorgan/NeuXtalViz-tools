@@ -168,7 +168,7 @@ class Experiment(NeuXtalVizPresenter):
 
         limits = self.view.get_goniometer_limits()
 
-        if hkl_1 is not None and self.model.has_UB():
+        if hkl is not None and self.model.has_UB():
             progress("Initializing instrument", 5)
 
             self.create_instrument()
